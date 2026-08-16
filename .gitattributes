@@ -1,0 +1,33 @@
+# Normalise line endings to LF in the repository.
+# Without this, every file committed from Windows stores CRLF, which produces
+# noisy whole-file diffs and can break shell scripts on the Linux builders
+# Vercel and Supabase run on.
+* text=auto eol=lf
+
+# Explicit for the file types in this project
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.js     text eol=lf
+*.mjs    text eol=lf
+*.json   text eol=lf
+*.css    text eol=lf
+*.sql    text eol=lf
+*.md     text eol=lf
+*.html   text eol=lf
+*.toml   text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+
+# Binary — never touch these
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.webp   binary
+*.gif    binary
+*.ico    binary
+*.woff   binary
+*.woff2  binary
+*.pdf    binary
+
+# SVG is text, but keep it out of diff noise heuristics
+*.svg    text eol=lf
