@@ -1,0 +1,6 @@
+# Supabase CLI local state — machine-specific, not shared
+.branches
+.temp
+
+# Local Docker stack output
+.env
