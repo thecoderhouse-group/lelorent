@@ -45,19 +45,25 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_revealed_at: string
           listing_id: string
+          reveal_count: number
           viewer_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          last_revealed_at?: string
           listing_id: string
+          reveal_count?: number
           viewer_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          last_revealed_at?: string
           listing_id?: string
+          reveal_count?: number
           viewer_id?: string
         }
         Relationships: [
@@ -376,6 +382,45 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          code: Database["public"]["Enums"]["plan_code"]
+          created_at: string
+          description: string
+          duration_days: number | null
+          gst_rate_bp: number
+          is_active: boolean
+          name: string
+          price_paise: number
+          reveal_quota: number | null
+          sort_order: number
+        }
+        Insert: {
+          code: Database["public"]["Enums"]["plan_code"]
+          created_at?: string
+          description: string
+          duration_days?: number | null
+          gst_rate_bp?: number
+          is_active?: boolean
+          name: string
+          price_paise: number
+          reveal_quota?: number | null
+          sort_order?: number
+        }
+        Update: {
+          code?: Database["public"]["Enums"]["plan_code"]
+          created_at?: string
+          description?: string
+          duration_days?: number | null
+          gst_rate_bp?: number
+          is_active?: boolean
+          name?: string
+          price_paise?: number
+          reveal_quota?: number | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -436,6 +481,69 @@ export type Database = {
           },
           {
             foreignKeyName: "saved_listings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          amount_paise: number
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan_code: Database["public"]["Enums"]["plan_code"]
+          provider: string | null
+          provider_order_id: string | null
+          provider_payment_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          tax_paise: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paise: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_code: Database["public"]["Enums"]["plan_code"]
+          provider?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          tax_paise?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paise?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_code?: Database["public"]["Enums"]["plan_code"]
+          provider?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          tax_paise?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -509,6 +617,16 @@ export type Database = {
       }
     }
     Functions: {
+      expire_subscriptions: { Args: never; Returns: number }
+      free_reveal_quota: { Args: never; Returns: number }
+      gst_split: {
+        Args: { p_price_paise: number; p_rate_bp: number }
+        Returns: {
+          base_paise: number
+          tax_paise: number
+        }[]
+      }
+      has_active_premium: { Args: { p_user: string }; Returns: boolean }
       listing_is_published: { Args: { p_listing_id: string }; Returns: boolean }
       localities_for_city: {
         Args: { p_city_slug: string }
@@ -525,6 +643,19 @@ export type Database = {
         Returns: {
           owner_name: string
           owner_phone: string
+          remaining: number
+          result: Database["public"]["Enums"]["reveal_result"]
+        }[]
+      }
+      reveal_status: {
+        Args: { p_listing_id: string }
+        Returns: {
+          already_unlocked: boolean
+          is_authenticated: boolean
+          is_premium: boolean
+          quota: number
+          remaining: number
+          used: number
         }[]
       }
     }
@@ -544,6 +675,19 @@ export type Database = {
       furnishing: "UNFURNISHED" | "SEMI_FURNISHED" | "FULLY_FURNISHED"
       listing_status: "DRAFT" | "PUBLISHED" | "RENTED" | "EXPIRED" | "REMOVED"
       parking_type: "NONE" | "TWO_WHEELER" | "FOUR_WHEELER" | "BOTH"
+      plan_code: "FREE" | "PREMIUM_1M"
+      reveal_result:
+        | "OK"
+        | "NOT_AUTHENTICATED"
+        | "NOT_FOUND"
+        | "QUOTA_EXCEEDED"
+        | "RATE_LIMITED"
+      subscription_status:
+        | "PENDING"
+        | "ACTIVE"
+        | "EXPIRED"
+        | "CANCELLED"
+        | "FAILED"
       tenant_pref:
         | "FAMILY"
         | "BACHELOR_MALE"
@@ -694,6 +838,21 @@ export const Constants = {
       furnishing: ["UNFURNISHED", "SEMI_FURNISHED", "FULLY_FURNISHED"],
       listing_status: ["DRAFT", "PUBLISHED", "RENTED", "EXPIRED", "REMOVED"],
       parking_type: ["NONE", "TWO_WHEELER", "FOUR_WHEELER", "BOTH"],
+      plan_code: ["FREE", "PREMIUM_1M"],
+      reveal_result: [
+        "OK",
+        "NOT_AUTHENTICATED",
+        "NOT_FOUND",
+        "QUOTA_EXCEEDED",
+        "RATE_LIMITED",
+      ],
+      subscription_status: [
+        "PENDING",
+        "ACTIVE",
+        "EXPIRED",
+        "CANCELLED",
+        "FAILED",
+      ],
       tenant_pref: [
         "FAMILY",
         "BACHELOR_MALE",
