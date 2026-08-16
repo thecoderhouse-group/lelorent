@@ -1,0 +1,1300 @@
+<title>Lelorent Build Plan</title>
+
+<style>
+  /* ============================================================
+     Tokens — light is the bare :root; dark redefines tokens only.
+     ============================================================ */
+  :root {
+    --paper:        #F5F7F5;
+    --surface:      #FFFFFF;
+    --surface-2:    #EAEEEA;
+    --code-bg:      #EFF2EF;
+
+    --ink:          #141C1B;
+    --ink-2:        #3B4846;
+    --muted:        #6B7A77;
+
+    --rule:         #D5DCD8;
+    --rule-strong:  #AFBAB6;
+
+    --accent:       #0E6A5F;
+    --accent-ink:   #0B534A;
+    --accent-soft:  #DDEBE7;
+
+    --flag:         #9A5F0E;
+    --flag-soft:    #F5E9D8;
+
+    --shadow: 0 1px 2px rgba(20,28,27,.05), 0 8px 24px -16px rgba(20,28,27,.28);
+
+    --font-head: "Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-body: Charter,"Bitstream Charter","Iowan Old Style","Source Serif 4",Georgia,"Times New Roman",serif;
+    --font-mono: "Cascadia Mono","Cascadia Code",Consolas,"SF Mono",Menlo,"DejaVu Sans Mono",monospace;
+
+    --measure: 66ch;
+    --col: 880px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:        #0E1413;
+      --surface:      #151D1C;
+      --surface-2:    #1E2827;
+      --code-bg:      #101817;
+
+      --ink:          #E2E9E6;
+      --ink-2:        #BDC8C4;
+      --muted:        #8B9A96;
+
+      --rule:         #29332F;
+      --rule-strong:  #3E4A47;
+
+      --accent:       #56C6B4;
+      --accent-ink:   #7FD8C9;
+      --accent-soft:  #10312D;
+
+      --flag:         #D9A452;
+      --flag-soft:    #2E2618;
+
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:        #0E1413;
+    --surface:      #151D1C;
+    --surface-2:    #1E2827;
+    --code-bg:      #101817;
+
+    --ink:          #E2E9E6;
+    --ink-2:        #BDC8C4;
+    --muted:        #8B9A96;
+
+    --rule:         #29332F;
+    --rule-strong:  #3E4A47;
+
+    --accent:       #56C6B4;
+    --accent-ink:   #7FD8C9;
+    --accent-soft:  #10312D;
+
+    --flag:         #D9A452;
+    --flag-soft:    #2E2618;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+
+  /* ============================================================
+     Base
+     ============================================================ */
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  a {
+    color: var(--accent-ink);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  a:hover { text-decoration-color: var(--accent); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
+  /* ============================================================
+     Title block — the drafting-sheet header
+     ============================================================ */
+  .sheet {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 0 28px 96px;
+  }
+
+  .titleblock {
+    border-bottom: 1.5px solid var(--rule-strong);
+    padding: 56px 0 0;
+    margin-bottom: 56px;
+  }
+
+  .tb-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+
+  .tb-title {
+    font-family: var(--font-head);
+    font-weight: 660;
+    font-size: clamp(34px, 5.2vw, 54px);
+    line-height: 1.04;
+    letter-spacing: -.024em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  .tb-lede {
+    max-width: 62ch;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    margin: 0 0 40px;
+  }
+
+  /* key/value grid, like a drawing's title block cells */
+  .tb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  .tb-cell {
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 12px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .tb-key {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .tb-val {
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 560;
+    letter-spacing: -.005em;
+    color: var(--ink);
+  }
+  .tb-val .rev { color: var(--accent); }
+
+  /* ============================================================
+     Layout: sticky contents rail + single measure column
+     ============================================================ */
+  .layout { display: block; }
+
+  .toc { display: none; }
+
+  @media (min-width: 1080px) {
+    .layout {
+      display: grid;
+      grid-template-columns: 208px minmax(0, 1fr);
+      gap: 64px;
+      align-items: start;
+    }
+    .toc {
+      display: block;
+      position: sticky;
+      top: 32px;
+      max-height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+  }
+
+  .toc-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+  .toc a {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    padding: 5px 8px 5px 0;
+    font-family: var(--font-head);
+    font-size: 13.5px;
+    line-height: 1.35;
+    color: var(--muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .toc a .n { font-family: var(--font-mono); font-size: 11.5px; color: var(--rule-strong); padding-top: 1px; }
+  .toc a:hover { color: var(--ink); }
+  .toc a.is-current { color: var(--accent-ink); border-left-color: var(--accent); font-weight: 600; }
+  .toc a.is-current .n { color: var(--accent); }
+
+  main { max-width: var(--col); }
+
+  /* ============================================================
+     Sections — hanging numerals in the left rail
+     ============================================================ */
+  .sec { scroll-margin-top: 24px; margin-bottom: 68px; }
+  .sec:last-child { margin-bottom: 0; }
+
+  .sec > h2 {
+    position: relative;
+    font-family: var(--font-head);
+    font-weight: 640;
+    font-size: clamp(24px, 3.1vw, 31px);
+    line-height: 1.16;
+    letter-spacing: -.021em;
+    margin: 0 0 8px;
+    padding-top: 22px;
+    border-top: 1.5px solid var(--rule-strong);
+    text-wrap: balance;
+  }
+  .sec > h2 .hn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 9px;
+  }
+  @media (min-width: 1320px) {
+    .sec > h2 .hn {
+      position: absolute;
+      left: -62px;
+      top: 30px;
+      margin: 0;
+      text-align: right;
+      width: 44px;
+    }
+  }
+
+  h3 {
+    font-family: var(--font-head);
+    font-weight: 620;
+    font-size: 18.5px;
+    letter-spacing: -.012em;
+    line-height: 1.3;
+    margin: 40px 0 10px;
+    color: var(--ink);
+  }
+  h3 .sn {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-right: 9px;
+  }
+
+  p { max-width: var(--measure); margin: 0 0 16px; }
+  .sec > h2 + p { color: var(--ink-2); }
+
+  strong { font-weight: 680; color: var(--ink); }
+  em { font-style: italic; }
+
+  ul, ol { max-width: var(--measure); margin: 0 0 16px; padding-left: 22px; }
+  li { margin-bottom: 7px; }
+  li::marker { color: var(--rule-strong); }
+  ol li::marker { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+
+  /* ============================================================
+     Code
+     ============================================================ */
+  code {
+    font-family: var(--font-mono);
+    font-size: .855em;
+    background: var(--surface-2);
+    color: var(--ink);
+    padding: .12em .38em;
+    border-radius: 3px;
+    border: 1px solid color-mix(in srgb, var(--rule) 70%, transparent);
+  }
+
+  pre {
+    margin: 20px 0 24px;
+    padding: 18px 20px;
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-left: 2.5px solid var(--accent);
+    border-radius: 4px;
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    line-height: 1.62;
+    color: var(--ink-2);
+    white-space: pre;
+  }
+  .pre-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 22px 0 -12px;
+  }
+
+  /* ============================================================
+     Tables — hairline spec sheets
+     ============================================================ */
+  .tw { overflow-x: auto; margin: 22px 0 26px; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  thead th {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--muted);
+    text-align: left;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--rule-strong);
+    background: var(--surface-2);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody td:first-child { color: var(--ink); font-weight: 560; }
+  table.nums td:not(:first-child) { font-variant-numeric: tabular-nums; }
+  td code, th code { font-size: 12.5px; }
+
+  /* ============================================================
+     Callouts
+     ============================================================ */
+  .callout {
+    margin: 22px 0 26px;
+    padding: 15px 18px;
+    border-radius: 4px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    font-size: 15.5px;
+    line-height: 1.55;
+  }
+  .callout p { max-width: none; margin: 0; }
+  .callout p + p { margin-top: 9px; }
+  .callout .ct {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .callout.rec { border-left: 2.5px solid var(--accent); background: var(--accent-soft); }
+  .callout.rec .ct { color: var(--accent-ink); }
+  .callout.flag { border-left: 2.5px solid var(--flag); background: var(--flag-soft); }
+  .callout.flag .ct { color: var(--flag); }
+  .callout.note { border-left: 2.5px solid var(--rule-strong); }
+  .callout.note .ct { color: var(--muted); }
+
+  .verdict {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 620;
+    letter-spacing: -.01em;
+    color: var(--accent-ink);
+    max-width: var(--measure);
+    margin: 18px 0 24px;
+    padding-left: 14px;
+    border-left: 2.5px solid var(--accent);
+  }
+
+  /* ============================================================
+     Gotcha list (unordered — these aren't a sequence)
+     ============================================================ */
+  .gotchas { list-style: none; padding: 0; max-width: var(--measure); }
+  .gotchas > li {
+    padding: 13px 0 13px 18px;
+    border-top: 1px solid var(--rule);
+    border-left: 2px solid var(--flag);
+    padding-left: 16px;
+    margin-bottom: 0;
+    background: linear-gradient(to right, var(--flag-soft), transparent 55%);
+  }
+  .gotchas > li:last-child { border-bottom: 1px solid var(--rule); }
+  .gotchas b { font-family: var(--font-head); font-weight: 620; font-size: 15.5px; color: var(--ink); }
+
+  /* ============================================================
+     Steps (real sequence: upload flow)
+     ============================================================ */
+  .steps { list-style: none; padding: 0; max-width: var(--measure); counter-reset: s; }
+  .steps > li {
+    counter-increment: s;
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    margin: 0;
+  }
+  .steps > li:last-child { border-bottom: none; }
+  .steps > li::before {
+    content: counter(s, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    padding-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ============================================================
+     Phases (real sequence, richer cards)
+     ============================================================ */
+  .phases { list-style: none; padding: 0; margin: 22px 0 26px; max-width: none; display: flex; flex-direction: column; gap: 1px; }
+  .phase {
+    display: grid;
+    grid-template-columns: 62px 1fr;
+    gap: 20px;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    margin: 0 0 -1px;
+  }
+  .phase:first-child { border-radius: 4px 4px 0 0; }
+  .phase:last-child { border-radius: 0 0 4px 4px; margin-bottom: 0; }
+  .phase-n {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--rule-strong);
+    font-variant-numeric: tabular-nums;
+    padding-top: 2px;
+  }
+  .phase-n.later { font-size: 13px; padding-top: 6px; letter-spacing: .05em; }
+  .phase-t {
+    font-family: var(--font-head);
+    font-size: 16.5px;
+    font-weight: 640;
+    letter-spacing: -.012em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .phase-s { font-size: 15px; line-height: 1.55; color: var(--ink-2); margin: 0 0 10px; max-width: none; }
+  .phase-d {
+    font-size: 14px;
+    color: var(--ink-2);
+    margin: 0;
+    max-width: none;
+    padding-top: 9px;
+    border-top: 1px dotted var(--rule-strong);
+  }
+  .phase-d .dl {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-right: 9px;
+  }
+
+  /* ============================================================
+     Decisions (reference IDs, not steps)
+     ============================================================ */
+  .decisions { list-style: none; padding: 0; max-width: var(--measure); }
+  .decisions > li {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+    margin: 0;
+  }
+  .decisions > li:first-child { border-top: 1px solid var(--rule); }
+  .decisions .rid {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    padding-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .decisions b { font-family: var(--font-head); font-weight: 620; font-size: 15.5px; color: var(--ink); }
+
+  footer {
+    margin-top: 72px;
+    padding-top: 22px;
+    border-top: 1.5px solid var(--rule-strong);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+  }
+
+  @media (max-width: 640px) {
+    body { font-size: 16.5px; }
+    .sheet { padding: 0 18px 64px; }
+    .titleblock { padding-top: 36px; }
+  }
+</style>
+
+<div class="sheet">
+
+  <header class="titleblock">
+    <p class="tb-eyebrow">Build plan &middot; Rev B</p>
+    <h1 class="tb-title">Lelorent</h1>
+    <p class="tb-lede">
+      A two-sided flat renting platform: <strong>post a property</strong> and <strong>search properties by
+      filters</strong>. Next.js full-stack on Vercel, Postgres and object storage on Supabase, engineered
+      to stay inside the free tier.
+    </p>
+
+    <div class="tb-grid">
+      <div class="tb-cell"><span class="tb-key">Frontend</span><span class="tb-val">Next.js 15 &middot; App Router</span></div>
+      <div class="tb-cell"><span class="tb-key">Backend</span><span class="tb-val">Server Actions &middot; no separate server</span></div>
+      <div class="tb-cell"><span class="tb-key">Data &amp; storage</span><span class="tb-val">Supabase</span></div>
+      <div class="tb-cell"><span class="tb-key">Media scope</span><span class="tb-val">4 photos &middot; no video</span></div>
+      <div class="tb-cell"><span class="tb-key">Free-tier capacity</span><span class="tb-val">~1,200 listings</span></div>
+      <div class="tb-cell"><span class="tb-key">Revision</span><span class="tb-val"><span class="rev">B</span> &mdash; video removed</span></div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <nav class="toc" aria-label="Contents">
+      <div class="toc-label">Contents</div>
+      <ol>
+        <li><a href="#s1"><span class="n">1</span><span>No separate Node server</span></a></li>
+        <li><a href="#s2"><span class="n">2</span><span>Firebase vs Supabase</span></a></li>
+        <li><a href="#s3"><span class="n">3</span><span>Stack</span></a></li>
+        <li><a href="#s4"><span class="n">4</span><span>Data model</span></a></li>
+        <li><a href="#s5"><span class="n">5</span><span>Photo pipeline</span></a></li>
+        <li><a href="#s6"><span class="n">6</span><span>Free-tier budget</span></a></li>
+        <li><a href="#s7"><span class="n">7</span><span>Search</span></a></li>
+        <li><a href="#s8"><span class="n">8</span><span>Phased build</span></a></li>
+        <li><a href="#s9"><span class="n">9</span><span>Open decisions</span></a></li>
+        <li><a href="#s10"><span class="n">10</span><span>Known risks</span></a></li>
+      </ol>
+    </nav>
+
+    <main>
+
+      <!-- ===================== 1 ===================== -->
+      <section class="sec" id="s1">
+        <h2><span class="hn">1</span>Backend: no separate Node server</h2>
+        <p>
+          Your instinct is right. Next.js Route Handlers and Server Actions <strong>are</strong> the Node
+          backend. A separate Express service would mean a second deploy, a second cold start, CORS, and
+          duplicated auth &mdash; with zero benefit at this scale.
+        </p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Concern</th><th>Handled by</th></tr></thead>
+            <tbody>
+              <tr><td>Create / edit / delete listing</td><td>Server Actions</td></tr>
+              <tr><td>Search and read paths</td><td>React Server Components hitting Supabase directly; filters live in the URL</td></tr>
+              <tr><td>Cron, cleanup, webhooks</td><td>Route Handlers in <code>app/api/*</code></td></tr>
+              <tr><td>Photo bytes</td><td>Browser uploads straight to Supabase Storage via signed URLs &mdash; never through Vercel</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===================== 2 ===================== -->
+      <section class="sec" id="s2">
+        <h2><span class="hn">2</span>Firebase vs Supabase</h2>
+        <p>Three reasons, in order of how much they matter here.</p>
+
+        <div class="callout rec">
+          <span class="ct">Recommendation</span>
+          <p><strong>Supabase.</strong> The deciding factor is not pricing &mdash; it is that this app is a
+          filter engine, and Firestore is bad at filter engines.</p>
+        </div>
+
+        <h3><span class="sn">2.1</span>Your app is a filter engine</h3>
+        <p>
+          You will filter on roughly twelve optional dimensions simultaneously: type, rent range, food
+          preference, pets, tenant type, furnishing, city, locality, amenities, availability date, deposit,
+          gender. In Postgres that is one <code>WHERE</code> clause.
+        </p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Need</th><th>Postgres</th><th>Firestore</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Arbitrary combos of 12 optional filters</td>
+                <td>One query, planner picks the index</td>
+                <td>Needs a <strong>composite index per filter combination</strong> &mdash; combinatorial explosion</td>
+              </tr>
+              <tr>
+                <td>Two range filters at once</td>
+                <td>Trivial</td>
+                <td>Supported since 2024, but forces index intersection and scans</td>
+              </tr>
+              <tr>
+                <td>Multi-select amenities (&ldquo;has all of&rdquo;)</td>
+                <td><code>text[] @&gt; array[...]</code> with a GIN index</td>
+                <td>One <code>array-contains-any</code> per query, max 30 values, can&rsquo;t combine two</td>
+              </tr>
+              <tr>
+                <td>Full-text on locality and title</td>
+                <td>Built-in <code>tsvector</code></td>
+                <td>Not supported &mdash; bolt on Algolia or Typesense</td>
+              </tr>
+              <tr>
+                <td>Radius search (&ldquo;within 3 km&rdquo;)</td>
+                <td>PostGIS <code>ST_DWithin</code></td>
+                <td>Geohash prefix hack, done by hand</td>
+              </tr>
+              <tr>
+                <td>Sort by rent, then filter</td>
+                <td>Free</td>
+                <td>Sort field must appear in every index</td>
+              </tr>
+              <tr>
+                <td>&ldquo;142 results found&rdquo;</td>
+                <td><code>count(*)</code></td>
+                <td>Costs one read per counted document</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="verdict">This alone decides it.</p>
+
+        <h3><span class="sn">2.2</span>Firebase Storage is no longer free for new projects</h3>
+        <div class="callout flag">
+          <span class="ct">Blocker</span>
+          <p>
+            Cloud Storage for Firebase and Cloud Functions both require the <strong>Blaze
+            pay-as-you-go plan</strong> on projects created since late 2024. Photos are core to your
+            product, so &ldquo;Firebase free tier&rdquo; does not really exist for this app &mdash; you would
+            be attaching a credit card on day one.
+          </p>
+        </div>
+
+        <h3><span class="sn">2.3</span>Free tiers side by side</h3>
+        <p><em>Verify current numbers at the pricing pages before you commit &mdash; these move.</em></p>
+
+        <div class="tw">
+          <table class="nums">
+            <thead><tr><th></th><th>Supabase Free</th><th>Firebase Spark</th></tr></thead>
+            <tbody>
+              <tr><td>Database</td><td>500 MB Postgres</td><td>1 GiB Firestore</td></tr>
+              <tr><td>Reads</td><td>Unlimited API requests</td><td><strong>50k doc reads/day</strong> &mdash; a search returning 20 cards costs 20 reads</td></tr>
+              <tr><td>Writes</td><td>Unlimited</td><td>20k/day</td></tr>
+              <tr><td>File storage</td><td>1 GB</td><td><strong>Requires Blaze</strong></td></tr>
+              <tr><td>Egress</td><td>5 GB/mo</td><td>10 GiB/mo (Firestore)</td></tr>
+              <tr><td>Auth</td><td>50k MAU</td><td>50k MAU</td></tr>
+              <tr><td>Server functions</td><td>500k edge function invocations</td><td><strong>Requires Blaze</strong></td></tr>
+              <tr><td>Gotcha</td><td><strong>Project pauses after 7 days idle</strong>; 2 projects per org; no daily backups</td><td>Storage and functions paywalled</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout note">
+          <span class="ct">Mitigation &amp; escape hatch</span>
+          <p><strong>The 7-day pause:</strong> a daily Vercel Cron pinging a trivial query keeps the project warm.</p>
+          <p><strong>Outgrowing the free tier:</strong> Supabase Pro is $25/mo &rarr; 8 GB database, 100 GB
+          storage, 250 GB egress. Same code, no migration.</p>
+        </div>
+      </section>
+
+      <!-- ===================== 3 ===================== -->
+      <section class="sec" id="s3">
+        <h2><span class="hn">3</span>Stack</h2>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td>Framework</td><td>Next.js 15, App Router, TypeScript</td><td>RSC for search pages means filters render server-side and the results are SEO-friendly</td></tr>
+              <tr><td>UI</td><td>Tailwind + shadcn/ui</td><td>Filter sidebars, sheets, and comboboxes are the bulk of the UI</td></tr>
+              <tr><td>Data, auth, storage</td><td>Supabase</td><td>See section 2</td></tr>
+              <tr><td>Validation</td><td>Zod, shared by the client form and the Server Action</td><td>One schema, no drift</td></tr>
+              <tr><td>Forms</td><td>react-hook-form + zodResolver</td><td>Multi-step post wizard</td></tr>
+              <tr><td>URL filter state</td><td><code>nuqs</code>, or hand-rolled <code>searchParams</code></td><td>Shareable, bookmarkable filtered URLs; the back button works</td></tr>
+              <tr><td>Image compression</td><td><code>browser-image-compression</code> + <code>heic2any</code> fallback</td><td>See section 5</td></tr>
+              <tr><td>Photo reorder</td><td><code>dnd-kit</code></td><td>Drag to set the cover photo</td></tr>
+              <tr><td>Rate limiting</td><td>A Postgres table, or Upstash Redis free tier</td><td>Abuse control on posting</td></tr>
+              <tr><td>Hosting</td><td>Vercel Hobby</td><td>100 GB bandwidth, cron included</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout flag">
+          <span class="ct">Auth &mdash; avoid phone OTP</span>
+          <p>
+            Use Google OAuth and email magic links. Supabase phone auth proxies to Twilio or MessageBird and
+            costs real money per SMS. Collect phone as a profile field instead, and verify later only if you
+            actually need it.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===================== 4 ===================== -->
+      <section class="sec" id="s4">
+        <h2><span class="hn">4</span>Data model</h2>
+        <p>
+          Denormalized but typed: enums for single-choice filters, <code>text[]</code> with GIN indexes for
+          multi-select. This keeps search to a single indexed query with no joins.
+        </p>
+
+        <p class="pre-label">Enums &mdash; single-choice filters</p>
+<pre><code>create type flat_type as enum (
+  '1RK','1BHK','2BHK','3BHK','4BHK','4BHK_PLUS',
+  'PG_BED','SHARED_ROOM','PRIVATE_ROOM','INDEPENDENT_HOUSE'
+);
+create type food_pref as enum ('VEG_ONLY','EGGETARIAN','NON_VEG_ALLOWED','NO_PREFERENCE');
+create type tenant_pref as enum ('FAMILY','BACHELOR_MALE','BACHELOR_FEMALE','STUDENTS','WORKING_PROFESSIONALS','ANYONE');
+create type furnishing as enum ('UNFURNISHED','SEMI_FURNISHED','FULLY_FURNISHED');
+create type parking_type as enum ('NONE','TWO_WHEELER','FOUR_WHEELER','BOTH');
+create type listing_status as enum ('DRAFT','PUBLISHED','RENTED','EXPIRED','REMOVED');</code></pre>
+
+        <p class="pre-label">Tables</p>
+<pre><code>create table profiles (
+  id            uuid primary key references auth.users on delete cascade,
+  full_name     text,
+  phone         text,
+  avatar_url    text,
+  created_at    timestamptz default now()
+);
+
+create table listings (
+  id              uuid primary key default gen_random_uuid(),
+  owner_id        uuid not null references profiles(id) on delete cascade,
+  status          listing_status not null default 'DRAFT',
+
+  -- core
+  title           text not null,
+  description     text,
+  flat_type       flat_type not null,
+  furnishing      furnishing not null default 'UNFURNISHED',
+
+  -- money (integers, whole rupees -- pick one unit and never mix)
+  rent            integer not null,
+  deposit         integer not null default 0,
+  maintenance     integer not null default 0,
+  maintenance_included boolean not null default false,
+
+  -- preferences  <- posting options become search filters 1:1
+  food_pref       food_pref not null default 'NO_PREFERENCE',
+  pets_allowed    boolean not null default false,
+  smoking_allowed boolean not null default false,
+  drinking_allowed boolean not null default false,
+  tenant_prefs    tenant_pref[] not null default '{ANYONE}',
+  couples_allowed boolean not null default false,
+
+  -- physical
+  bedrooms        smallint,
+  bathrooms       smallint,
+  balconies       smallint,
+  floor_number    smallint,
+  total_floors    smallint,
+  carpet_area_sqft integer,
+  parking         parking_type not null default 'NONE',
+  amenities       text[] not null default '{}',   -- lift, power_backup, wifi, gym, ...
+
+  -- location
+  city            text not null,
+  locality        text not null,
+  address_line    text,               -- never exposed publicly
+  pincode         text,
+  geo             geography(point,4326),
+
+  -- availability
+  available_from  date not null,
+  min_stay_months smallint,
+
+  -- housekeeping
+  photo_count     smallint not null default 0,    -- denormalized, kept by trigger (4.1)
+  views_count     integer not null default 0,
+  published_at    timestamptz,
+  expires_at      timestamptz,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now(),
+
+  search_vector tsvector generated always as (
+    to_tsvector('english', coalesce(title,'') || ' ' || coalesce(locality,'') || ' ' || coalesce(city,''))
+  ) stored,
+
+  constraint rent_positive check (rent &gt; 0),
+  constraint sane_floors check (floor_number is null or total_floors is null or floor_number &lt;= total_floors)
+);
+
+create table listing_photos (
+  id            uuid primary key default gen_random_uuid(),
+  listing_id    uuid not null references listings(id) on delete cascade,
+  card_path     text not null,          -- listings/{id}/{uuid}-card.webp   (640px)
+  full_path     text not null,          -- listings/{id}/{uuid}-full.webp   (1600px)
+  blur_data_url text,                   -- ~20px base64 LQIP, inlined into the card
+  width         integer,                -- of the full variant
+  height        integer,
+  bytes         integer,
+  position      smallint not null default 0,   -- 0 = cover photo
+  created_at    timestamptz default now(),
+  unique (listing_id, position)
+);
+
+create table saved_listings (
+  user_id    uuid references profiles(id) on delete cascade,
+  listing_id uuid references listings(id) on delete cascade,
+  created_at timestamptz default now(),
+  primary key (user_id, listing_id)
+);
+
+create table listing_reports (
+  id uuid primary key default gen_random_uuid(),
+  listing_id uuid references listings(id) on delete cascade,
+  reporter_id uuid references profiles(id),
+  reason text not null,
+  created_at timestamptz default now()
+);</code></pre>
+
+        <div class="callout note">
+          <span class="ct">Adding video later</span>
+          <p>
+            A small migration: add a <code>listing_videos</code> table (or a <code>kind</code> column here)
+            plus a second storage prefix. Nothing in this schema blocks it.
+          </p>
+        </div>
+
+        <h3><span class="sn">4.1</span>The 4-photo cap, enforced in the database</h3>
+        <p>Don&rsquo;t trust the UI for &ldquo;max 4 photos&rdquo;.</p>
+<pre><code>create or replace function enforce_photo_limit() returns trigger language plpgsql as $$
+declare n int;
+begin
+  select count(*) into n from listing_photos where listing_id = new.listing_id;
+  if n &gt;= 4 then raise exception 'max 4 photos per listing'; end if;
+  return new;
+end $$;
+
+create trigger photo_limit before insert on listing_photos
+  for each row execute function enforce_photo_limit();
+
+-- keep listings.photo_count in sync so search results don't need a join
+create or replace function sync_photo_count() returns trigger language plpgsql as $$
+begin
+  update listings set photo_count = (
+    select count(*) from listing_photos
+    where listing_id = coalesce(new.listing_id, old.listing_id)
+  ) where id = coalesce(new.listing_id, old.listing_id);
+  return null;
+end $$;
+
+create trigger photo_count_sync after insert or delete on listing_photos
+  for each row execute function sync_photo_count();</code></pre>
+
+        <h3><span class="sn">4.2</span>Indexes</h3>
+<pre><code>create index on listings using gin (amenities);
+create index on listings using gin (tenant_prefs);
+create index on listings using gin (search_vector);
+create index on listings using gist (geo);
+create index listings_browse_idx on listings (status, city, rent)        where status='PUBLISHED';
+create index listings_recent_idx on listings (status, published_at desc) where status='PUBLISHED';
+create index listings_avail_idx  on listings (status, available_from)    where status='PUBLISHED';
+create index on listings (owner_id, status);
+create index on listing_photos (listing_id, position);</code></pre>
+        <p>
+          Partial indexes on <code>status='PUBLISHED'</code> keep them small &mdash; draft and rented rows
+          never bloat the index.
+        </p>
+
+        <h3><span class="sn">4.3</span>Row-level security</h3>
+        <p>Turn RLS on for every table.</p>
+        <ul>
+          <li><strong>listings</strong> &mdash; anyone can select rows where <code>status='PUBLISHED'</code>; the owner can select, insert, update, and delete their own.</li>
+          <li><strong>Private fields</strong> &mdash; <code>address_line</code> and owner contact must not be in the public select path. Expose search results through a <code>listings_public</code> view with an explicit column list, and reveal contact only via an authenticated RPC that also logs the reveal.</li>
+          <li><strong>listing_photos</strong> &mdash; select allowed if the parent listing is visible; write only by the owner.</li>
+          <li><strong>Storage policies</strong> mirror this &mdash; the write path must start with <code>listings/{id}/</code> where the caller owns <code>{id}</code>.</li>
+        </ul>
+      </section>
+
+      <!-- ===================== 5 ===================== -->
+      <section class="sec" id="s5">
+        <h2><span class="hn">5</span>Photo pipeline &mdash; max 4 per listing</h2>
+
+        <div class="callout rec">
+          <span class="ct">Principle</span>
+          <p>
+            Compress in the browser, upload the compressed bytes directly to Supabase Storage via signed
+            URLs. Originals never touch your server &mdash; zero Vercel function time, zero Vercel
+            bandwidth, and the free tier only ever stores the small version.
+          </p>
+        </div>
+
+        <h3><span class="sn">5.1</span>Three artifacts per photo</h3>
+
+        <div class="tw">
+          <table class="nums">
+            <thead><tr><th>Variant</th><th>Longest edge</th><th>Quality</th><th>Target</th><th>Used on</th></tr></thead>
+            <tbody>
+              <tr><td><code>card</code></td><td>640 px</td><td>0.72</td><td>~30 KB</td><td>Search results grid</td></tr>
+              <tr><td><code>full</code></td><td>1600 px</td><td>0.80</td><td>~180 KB</td><td>Detail page and lightbox</td></tr>
+              <tr><td><code>blur</code></td><td>20 px</td><td>0.5</td><td>~400 B</td><td>Inlined base64 LQIP, stored in the DB row, not Storage</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+<pre><code>import imageCompression from 'browser-image-compression';
+
+const opts = { useWebWorker: true, fileType: 'image/webp' as const };
+const card = await imageCompression(file, { ...opts, maxWidthOrHeight: 640,  initialQuality: 0.72 });
+const full = await imageCompression(file, { ...opts, maxWidthOrHeight: 1600, initialQuality: 0.80 });</code></pre>
+
+        <p>
+          Upload with a long cache header. You already produced the exact display size, so
+          <code>next/image</code> re-optimization would only burn Vercel&rsquo;s transformation quota &mdash;
+          render these with <code>&lt;Image unoptimized&gt;</code> or a plain <code>&lt;img&gt;</code>.
+        </p>
+
+<pre><code>await supabase.storage.from('listing-photos')
+  .upload(path, blob, { contentType: 'image/webp', cacheControl: '31536000', upsert: true });</code></pre>
+
+        <h3><span class="sn">5.2</span>Four things that will actually bite you</h3>
+        <ul class="gotchas">
+          <li>
+            <b>HEIC from iPhones.</b> Photos picked from the iOS Files app arrive as <code>.heic</code>, which
+            Chrome and Firefox cannot decode to a canvas &mdash; compression silently fails. Detect the type
+            and route through <code>heic2any</code> before compressing. The iOS camera picker usually hands
+            over JPEG, so this only affects a subset of users, which is exactly what makes it easy to miss
+            in testing.
+          </li>
+          <li>
+            <b>EXIF GPS leaks the exact flat address.</b> <code>browser-image-compression</code> re-encodes
+            via canvas, which drops EXIF &mdash; but verify it on a real geotagged photo, and never echo
+            <code>address_line</code> from the public view.
+          </li>
+          <li>
+            <b>EXIF orientation.</b> Apply rotation <em>before</em> stripping metadata, or portrait photos
+            upload sideways. Let the library handle it, then confirm with a photo from a phone.
+          </li>
+          <li>
+            <b>Validate server-side too.</b> Check content type and byte length in the Server Action before
+            inserting the <code>listing_photos</code> row. A signed upload URL is a write primitive &mdash;
+            treat anything the client claims about the file as untrusted.
+          </li>
+        </ul>
+        <p>
+          Reject inputs over roughly 25 MB before compressing, cap at four files per selection, and show
+          per-file progress.
+        </p>
+
+        <h3><span class="sn">5.3</span>Upload flow &mdash; avoids orphaned files</h3>
+        <ol class="steps">
+          <li>User completes step 1 of the wizard. A Server Action inserts a <code>DRAFT</code> listing and returns the <code>listing_id</code>.</li>
+          <li>Client compresses each photo into card, full, and blur variants.</li>
+          <li>Client requests signed upload URLs for <code>listings/{listing_id}/...</code>.</li>
+          <li>Browser <code>PUT</code>s bytes straight to Supabase Storage, with a progress bar per file.</li>
+          <li>Server Action inserts the <code>listing_photos</code> rows. The trigger enforces the cap of four.</li>
+          <li>User drags to reorder. <code>position = 0</code> is the cover photo shown on search cards.</li>
+          <li>Final step sets <code>status='PUBLISHED'</code>, <code>published_at=now()</code>, and <code>expires_at=now()+60 days</code>.</li>
+        </ol>
+
+        <div class="callout note">
+          <span class="ct">Nightly cron</span>
+          <p>
+            One daily Vercel Cron does four jobs: delete <code>DRAFT</code> listings older than 24 hours
+            along with their storage objects, expire listings past <code>expires_at</code>, sweep storage
+            objects with no matching <code>listing_photos</code> row, and keep the Supabase project from
+            auto-pausing.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===================== 6 ===================== -->
+      <section class="sec" id="s6">
+        <h2><span class="hn">6</span>Free-tier budget</h2>
+        <p>
+          <strong>Per listing:</strong> 4 &times; card (~30 KB) + 4 &times; full (~180 KB) &asymp;
+          <strong>840 KB</strong>.
+        </p>
+
+        <div class="tw">
+          <table class="nums">
+            <thead><tr><th>Scenario</th><th>Listings that fit in 1 GB</th></tr></thead>
+            <tbody>
+              <tr><td>4 photos each</td><td><strong>~1,200</strong></td></tr>
+              <tr><td>8 photos each (see 9.6)</td><td>~600</td></tr>
+              <tr><td>Average 2.5 photos, realistic</td><td>~1,900</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout rec">
+          <span class="ct">Effect of dropping video</span>
+          <p>
+            Capacity roughly <strong>quadrupled</strong>. It was ~270 listings with video; storage is no
+            longer the thing you will hit first.
+          </p>
+        </div>
+
+        <p><strong>Egress, 5 GB per month:</strong></p>
+
+        <div class="tw">
+          <table class="nums">
+            <thead><tr><th>Page</th><th>Weight</th><th>Views before 5 GB</th></tr></thead>
+            <tbody>
+              <tr><td>Search results, 12 cards</td><td>~360 KB</td><td>~14,000</td></tr>
+              <tr><td>Detail page, 4 full photos</td><td>~750 KB</td><td>~6,900</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Both are comfortable for launch. Levers if you approach the cap, cheapest first:</p>
+        <ol>
+          <li>Lazy-load card images below the fold with <code>loading="lazy"</code>; the blur LQIP covers the gap.</li>
+          <li>Paginate at 12&ndash;20 results using keyset pagination, not offset.</li>
+          <li>Load the full-size photo only when the lightbox opens &mdash; show the card upscaled behind the blur until then.</li>
+          <li>Put a Cloudflare-proxied custom domain in front of the storage bucket.</li>
+          <li>Supabase Pro at $25/mo &rarr; 250 GB egress.</li>
+        </ol>
+
+        <div class="callout flag">
+          <span class="ct">Do this on day one</span>
+          <p>Set up usage alerts in the Supabase dashboard. Hitting the storage cap silently fails uploads.</p>
+        </div>
+      </section>
+
+      <!-- ===================== 7 ===================== -->
+      <section class="sec" id="s7">
+        <h2><span class="hn">7</span>Search implementation</h2>
+        <p>Filters live in the URL:</p>
+<pre><code>/search?city=pune&amp;type=2BHK,3BHK&amp;rent_max=25000&amp;food=VEG_ONLY&amp;pets=1&amp;amenities=lift,parking</code></pre>
+        <p>Parse, run through Zod, then build one Supabase query. Every filter is conditional; unset filters add no clause.</p>
+
+<pre><code>let q = supabase.from('listings_public')       // view: excludes address_line, owner contact
+  .select('id,title,rent,flat_type,locality,city,food_pref,pets_allowed,available_from,cover_card_path,blur_data_url',
+          { count: 'exact' })
+  .eq('status', 'PUBLISHED');
+
+if (f.city)        q = q.eq('city', f.city);
+if (f.types)       q = q.in('flat_type', f.types);
+if (f.rentMin)     q = q.gte('rent', f.rentMin);
+if (f.rentMax)     q = q.lte('rent', f.rentMax);
+if (f.food)        q = q.in('food_pref', f.food);
+if (f.pets)        q = q.eq('pets_allowed', true);
+if (f.furnishing)  q = q.in('furnishing', f.furnishing);
+if (f.amenities)   q = q.contains('amenities', f.amenities);     // GIN, "has ALL of"
+if (f.tenant)      q = q.overlaps('tenant_prefs', f.tenant);     // GIN, "has ANY of"
+if (f.availBy)     q = q.lte('available_from', f.availBy);
+if (f.withPhotos)  q = q.gt('photo_count', 0);
+if (f.text)        q = q.textSearch('search_vector', f.text);
+
+q = q.order(sortColumn, { ascending: sortAsc }).range(offset, offset + 19);</code></pre>
+
+        <p>
+          Build <code>listings_public</code> as a view that already joins in the cover photo
+          (<code>position = 0</code>), so search never needs a second round-trip for images.
+        </p>
+        <p>
+          Radius search needs PostGIS <code>ST_DWithin</code>, which PostgREST cannot express &mdash; write
+          that one as a <code>search_listings(...)</code> SQL function and call it via <code>.rpc()</code>.
+          Ship the flat version first and add geo in phase 5.
+        </p>
+
+        <div class="callout note">
+          <span class="ct">Filter UX</span>
+          <p>
+            Sidebar on desktop, bottom sheet on mobile. Active filters render as removable chips with a live
+            result count. Debounce the rent slider by about 300 ms. Because state lives in the URL, RSC
+            re-renders handle everything with no client fetch layer.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===================== 8 ===================== -->
+      <section class="sec" id="s8">
+        <h2><span class="hn">8</span>Phased build</h2>
+
+        <ul class="phases">
+          <li class="phase">
+            <div class="phase-n">00</div>
+            <div>
+              <p class="phase-t">Foundation</p>
+              <p class="phase-s">Next.js, TypeScript, Tailwind and shadcn scaffold. Supabase project, env wiring, and an empty app deployed to Vercel.</p>
+              <p class="phase-d"><span class="dl">Done when</span>CI is green and the production URL is live.</p>
+            </div>
+          </li>
+          <li class="phase">
+            <div class="phase-n">01</div>
+            <div>
+              <p class="phase-t">Auth</p>
+              <p class="phase-s">Google OAuth and magic links, a <code>profiles</code> row created on signup, middleware-protected routes, header and avatar.</p>
+              <p class="phase-d"><span class="dl">Done when</span>You can sign in on production.</p>
+            </div>
+          </li>
+          <li class="phase">
+            <div class="phase-n">02</div>
+            <div>
+              <p class="phase-t">Schema</p>
+              <p class="phase-s">All migrations, enums, indexes, RLS policies, photo triggers, the <code>listings_public</code> view, the storage bucket and its policies, plus ~30 seeded listings with photos.</p>
+              <p class="phase-d"><span class="dl">Done when</span>RLS is verified &mdash; a signed-out user cannot read <code>address_line</code>.</p>
+            </div>
+          </li>
+          <li class="phase">
+            <div class="phase-n">03</div>
+            <div>
+              <p class="phase-t">Search &mdash; the read path, first</p>
+              <p class="phase-s"><code>/search</code> with the full filter set, cards, pagination, sort, and an empty state. <code>/listing/[id]</code> detail with gallery and lightbox.</p>
+              <p class="phase-d"><span class="dl">Done when</span>Every filter works against seed data.</p>
+            </div>
+          </li>
+          <li class="phase">
+            <div class="phase-n">04</div>
+            <div>
+              <p class="phase-t">Post a property</p>
+              <p class="phase-s">Multi-step wizard, Zod schema shared with the Server Action, draft autosave, photo upload (compress, signed URL, reorder, cover), and a <code>/dashboard</code> to edit, mark rented, or delete.</p>
+              <p class="phase-d"><span class="dl">Done when</span>You can post a real listing with 4 photos from a phone.</p>
+            </div>
+          </li>
+          <li class="phase">
+            <div class="phase-n">05</div>
+            <div>
+              <p class="phase-t">Polish</p>
+              <p class="phase-s">Saved listings, contact-reveal RPC behind login, report listing, share, SEO metadata, sitemap, JSON-LD <code>Offer</code>, and OG images.</p>
+              <p class="phase-d"><span class="dl">Done when</span>Lighthouse scores 90 or above.</p>
+            </div>
+          </li>
+          <li class="phase">
+            <div class="phase-n">06</div>
+            <div>
+              <p class="phase-t">Hardening</p>
+              <p class="phase-s">Rate-limit posting to around 5 listings per day per user, report queue with an admin view, cron for drafts, expiry, orphans and keep-alive, Sentry, and usage monitoring.</p>
+              <p class="phase-d"><span class="dl">Done when</span>The abuse paths are covered.</p>
+            </div>
+          </li>
+          <li class="phase">
+            <div class="phase-n later">LATER</div>
+            <div>
+              <p class="phase-t">Beyond v1</p>
+              <p class="phase-s">Map and radius search, in-app messaging, video.</p>
+            </div>
+          </li>
+        </ul>
+
+        <div class="callout rec">
+          <span class="ct">Two sequencing notes</span>
+          <p>
+            <strong>Ship phase 3 against seed data before building phase 4.</strong> The search page is what
+            tells you whether your filter set is actually right, and changing the schema is far cheaper
+            before a form is bound to it.
+          </p>
+          <p>
+            <strong>Test the photo pipeline on a real phone during phase 4, not at the end.</strong> HEIC and
+            EXIF orientation are invisible on a desktop dev machine.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===================== 9 ===================== -->
+      <section class="sec" id="s9">
+        <h2><span class="hn">9</span>Decisions to make before phase 2</h2>
+
+        <ul class="decisions">
+          <li>
+            <span class="rid">9.1</span>
+            <div><b>Geography.</b> One city or many? Determines whether <code>city</code> is an enum, a lookup
+            table, or free text, and whether you need locality autocomplete. The plan assumes multi-city,
+            with a cities and localities lookup added in phase 3.</div>
+          </li>
+          <li>
+            <span class="rid">9.2</span>
+            <div><b>Contact model.</b> Reveal the phone number after login, or build in-app messaging?
+            Messaging is a whole extra subsystem &mdash; Supabase Realtime, notifications.
+            <em>Recommended: gated phone reveal for v1.</em></div>
+          </li>
+          <li>
+            <span class="rid">9.3</span>
+            <div><b>Who posts.</b> Owners only, or brokers too? Changes moderation, and whether you need a
+            &ldquo;posted by&rdquo; badge &mdash; one of the most-used filters on Indian rental sites.</div>
+          </li>
+          <li>
+            <span class="rid">9.4</span>
+            <div><b>Listing lifetime.</b> The plan assumes 60-day auto-expiry with a renew prompt, which keeps
+            the free tier from filling with stale listings.</div>
+          </li>
+          <li>
+            <span class="rid">9.5</span>
+            <div><b>Monetization.</b> None in v1 &mdash; but if featured listings are coming, add
+            <code>is_featured boolean</code> and <code>featured_until timestamptz</code> in phase 2 rather
+            than migrating later.</div>
+          </li>
+          <li>
+            <span class="rid">9.6</span>
+            <div><b>Is 4 photos enough?</b> Worth revisiting now that video is gone. Rental sites typically
+            allow 8&ndash;10, and renters skip listings that don&rsquo;t show the bathroom and kitchen. At
+            8 photos you would still fit ~600 listings in the free tier. Keeping the cap at 4 as specified
+            &mdash; flagged because the constraint that motivated it no longer applies.</div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ===================== 10 ===================== -->
+      <section class="sec" id="s10">
+        <h2><span class="hn">10</span>Known risks</h2>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Risk</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr><td>HEIC uploads silently fail on non-Safari browsers</td><td><code>heic2any</code> fallback, tested with a real iPhone file (5.2)</td></tr>
+              <tr><td>GPS EXIF leaking exact addresses</td><td>Strip client-side, verify on a geotagged photo, never return <code>address_line</code> publicly</td></tr>
+              <tr><td>Photos sideways from phone cameras</td><td>Handle EXIF orientation before re-encoding; test in phase 4</td></tr>
+              <tr><td>Supabase project auto-pauses after 7 idle days</td><td>Daily keep-alive cron, which also does draft and orphan cleanup</td></tr>
+              <tr><td>Fake or spam listings</td><td>Rate limit, require verified email, report queue; phone-verify before publish if it gets bad</td></tr>
+              <tr><td>Orphaned storage objects from abandoned drafts</td><td>Nightly sweep of objects with no <code>listing_photos</code> row</td></tr>
+              <tr><td>Listings with no photos rank and convert poorly</td><td>Require at least one photo to publish, and offer a &ldquo;has photos&rdquo; filter</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer>
+        <span>Lelorent build plan</span>
+        <span>Revision B &mdash; photos only</span>
+        <span>Next.js &middot; Supabase &middot; Vercel</span>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        links.forEach(function (a) { a.classList.remove('is-current'); });
+        var link = map[entry.target.id];
+        if (link) link.classList.add('is-current');
+      });
+    }, { rootMargin: '0px 0px -72% 0px', threshold: 0 });
+
+    document.querySelectorAll('.sec').forEach(function (s) { observer.observe(s); });
+  })();
+</script>
