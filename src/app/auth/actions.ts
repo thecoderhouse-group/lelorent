@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site-url";
 
 function safePath(next: FormDataEntryValue | null): string {
   const value = typeof next === "string" ? next : "";
@@ -27,7 +27,7 @@ export async function signInWithEmail(
     return { error: "Enter a valid email address." };
   }
 
-  const origin = (await headers()).get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL;
+  const origin = await getSiteUrl();
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithOtp({
@@ -47,7 +47,7 @@ export async function signInWithEmail(
  */
 export async function signInWithGoogle(formData: FormData) {
   const next = safePath(formData.get("next"));
-  const origin = (await headers()).get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL;
+  const origin = await getSiteUrl();
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
