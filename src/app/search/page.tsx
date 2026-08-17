@@ -4,9 +4,12 @@ import type { Metadata } from "next";
 import { MagnifyingGlass } from "@phosphor-icons/react/ssr";
 
 import { ActiveFilters } from "@/components/active-filters";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { CategoryTabs } from "@/components/category-tabs";
 import { FilterPanel } from "@/components/filter-panel";
 import { ListingCard, ListingCardSkeleton } from "@/components/listing-card";
 import { SearchToolbar } from "@/components/search-toolbar";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import {
   describeActiveFilters,
@@ -14,13 +17,40 @@ import {
   PAGE_SIZE,
   type Filters,
 } from "@/lib/filters";
-import { getCities, getLocalities, searchListings } from "@/lib/listings";
+import {
+  getCities,
+  getLocalities,
+  searchListings,
+  type City,
+} from "@/lib/listings";
 
-export const metadata: Metadata = {
-  title: "Search flats",
-  description:
-    "Filter flats, PGs and shared rooms by rent, locality, food preference, pets and tenant type across six Indian metros.",
-};
+const DEFAULT_DESCRIPTION =
+  "Filter flats, PGs and shared rooms by rent, locality, food preference, pets and tenant type across six Indian metros.";
+
+/**
+ * The city page is the shareable artefact of this route, so its title and
+ * description name the city rather than describing the search tool. getCities
+ * is memoised per request, so this costs nothing beyond the query the page
+ * already runs.
+ */
+export async function generateMetadata({
+  searchParams,
+}: PageProps<"/search">): Promise<Metadata> {
+  const params = await searchParams;
+  const citySlug = typeof params.city === "string" ? params.city : "";
+
+  if (citySlug) {
+    const city = (await getCities()).find((c) => c.slug === citySlug);
+    if (city) {
+      return {
+        title: `Flats for rent in ${city.name}`,
+        description: `Flats, PGs and shared rooms to rent in ${city.name}, ${city.state}. Listed by owners, filterable by rent, locality, furnishing and food preference.`,
+      };
+    }
+  }
+
+  return { title: "Search flats", description: DEFAULT_DESCRIPTION };
+}
 
 function EmptyState({ hasFilters }: { hasFilters: boolean }) {
   return (
@@ -187,20 +217,66 @@ function ResultsSkeleton() {
   );
 }
 
+/**
+ * Breadcrumb, page title and category tabs.
+ *
+ * Rendered outside the results Suspense boundary on purpose: none of it
+ * depends on the search query, so the chrome that tells the user where they
+ * are should not blink out and back every time a filter changes.
+ */
+function SearchMasthead({ city }: { city: City | null }) {
+  return (
+    <div className="border-b border-border bg-card/50">
+      <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6">
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Property", href: "/search" },
+            ...(city ? [{ label: city.name }] : []),
+          ]}
+        />
+
+        <h1 className="mt-3 text-xl font-semibold tracking-tight sm:text-2xl">
+          {city ? (
+            <>
+              Homes to rent in {city.name}
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                {city.state}
+              </span>
+            </>
+          ) : (
+            "Homes to rent across India"
+          )}
+        </h1>
+
+        <div className="mt-3">
+          <CategoryTabs />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
   const filters = (await searchParamsCache.parse(searchParams)) as Filters;
+
+  // Resolved here rather than inside Results so the masthead can name the city
+  // in the static part of the page. Memoised, so Results reuses this result.
+  const cities = await getCities();
+  const city = cities.find((c) => c.slug === filters.city) ?? null;
 
   return (
     <>
       <SiteHeader />
       <main className="flex-1">
-        <h1 className="sr-only">Search flats to rent</h1>
+        <SearchMasthead city={city} />
         {/* Keyed so switching filters re-suspends and shows the skeleton
             rather than holding the previous results in place. */}
         <Suspense key={JSON.stringify(filters)} fallback={<ResultsSkeleton />}>
           <Results filters={filters} />
         </Suspense>
       </main>
+      <SiteFooter />
     </>
   );
 }

@@ -67,6 +67,7 @@
   --color-plate: var(--plate);                    /* signage plate, brand-constant */
   --color-plate-foreground: var(--plate-foreground);
   --color-plate-muted: var(--plate-muted);
+  --color-plate-accent: var(--plate-accent);      /* the green, ON the plate */
   --color-hairline: var(--hairline);              /* thinner than --border */
 
   --radius-sm: calc(var(--radius) * 0.6);
@@ -119,6 +120,13 @@
   --plate: oklch(0.240 0.045 163);
   --plate-foreground: oklch(0.965 0.010 150);
   --plate-muted: oklch(0.720 0.030 155);
+  /* Accent green for text and icons sitting ON the plate.
+     It has to be its own token, and it has to be the bright green in BOTH
+     themes, because the plate does not change with the theme while --primary
+     does: light-mode --primary on the plate measures 2.97:1 and fails normal
+     text. This one clears 9.6:1 against the same ground. Use --primary for
+     green on paper, --plate-accent for green on the plate. */
+  --plate-accent: oklch(0.780 0.165 156);
 
   --radius: 0.5rem;
 
@@ -171,6 +179,7 @@
   --plate: oklch(0.240 0.045 163);
   --plate-foreground: oklch(0.965 0.010 150);
   --plate-muted: oklch(0.720 0.030 155);
+  --plate-accent: oklch(0.780 0.165 156);
 
   --sidebar: oklch(0.205 0.016 162);
   --sidebar-foreground: oklch(0.965 0.005 150);

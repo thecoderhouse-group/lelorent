@@ -105,7 +105,19 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
         "active:translate-y-px motion-reduce:active:translate-y-0",
       )}
     >
-      <PhotoSlot listing={listing} />
+      <div className="relative">
+        <PhotoSlot listing={listing} />
+
+        {/* A flatmate ad is a different proposition from a tenancy — you are
+            joining a household, not signing for a unit. That is the first
+            thing to know about the card, so it sits on the photo rather than
+            in the fact row where it would read as one spec among many. */}
+        {listing.listing_kind === "FLATMATE" && (
+          <span className="sign-label absolute left-3 top-3 rounded-full bg-primary px-2.5 py-1.5 text-primary-foreground shadow-sm">
+            Flatmate wanted
+          </span>
+        )}
+      </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-baseline justify-between gap-3">
@@ -125,7 +137,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             {/* Whole card is the hit target via the stretched link, but only
                 the title is in the tab order, so the grid stays navigable. */}
             <Link
-              href={`/listing/${listing.id}`}
+              href={`/viewproperty/${listing.id}`}
               className="rounded-sm outline-none after:absolute after:inset-0 after:content-[''] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
             >
               {listing.title}

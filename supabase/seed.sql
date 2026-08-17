@@ -344,3 +344,89 @@ from (values
 join public.cities     c on c.slug = v.city_slug
 join public.localities l on l.slug = v.locality_slug and l.city_id = c.id
 on conflict (id) do nothing;
+
+-- -----------------------------------------------------------------------------
+-- 3. Flatmate listings (0010_listing_kind.sql).
+--    Same shape as above, split into its own statement because these are the
+--    only rows that state listing_kind explicitly: every other listing has it
+--    derived from flat_type by the listings_derive_kind trigger, and FLATMATE
+--    is precisely the value that cannot be derived.
+--
+--    Posted by people already living in the flat, so the tenant_prefs read as
+--    "who I want to share with" rather than "who I will rent to".
+-- -----------------------------------------------------------------------------
+insert into public.listings (
+  id, owner_id, status, title, description,
+  flat_type, listing_kind, furnishing, rent, deposit, maintenance, maintenance_included,
+  food_pref, pets_allowed, smoking_allowed, drinking_allowed, couples_allowed,
+  tenant_prefs, bedrooms, bathrooms, balconies, floor_number, total_floors,
+  carpet_area_sqft, parking, amenities,
+  city_id, locality_id, address_line, pincode, available_from, min_stay_months
+)
+select
+  v.id::uuid,
+  v.owner_id::uuid,
+  v.status::public.listing_status,
+  v.title,
+  v.description,
+  v.flat_type::public.flat_type,
+  v.listing_kind::public.listing_kind,
+  v.furnishing::public.furnishing,
+  v.rent, v.deposit, v.maintenance, v.maintenance_included,
+  v.food_pref::public.food_pref,
+  v.pets, v.smoking, v.drinking, v.couples,
+  v.tenant_prefs::public.tenant_pref[],
+  v.bedrooms, v.bathrooms, v.balconies, v.floor_number, v.total_floors,
+  v.carpet_area, v.parking::public.parking_type,
+  v.amenities::text[],
+  c.id, l.id,
+  v.address_line, v.pincode,
+  current_date + v.available_in_days,
+  v.min_stay
+from (values
+  ('b0000000-0000-4000-8000-000000000040','a0000000-0000-4000-8000-000000000003','PUBLISHED',
+   'Looking for a third flatmate in Koramangala','Two of us, both working in product, sharing a 3BHK. The spare bedroom is yours, attached bathroom. We cook most nights and split groceries.',
+   'PRIVATE_ROOM','FLATMATE','FULLY_FURNISHED',18000,36000,1500,true,'NON_VEG_ALLOWED',false,false,true,false,
+   '{WORKING_PROFESSIONALS,BACHELOR_MALE,BACHELOR_FEMALE}',1,1,1,3,5,220,'TWO_WHEELER',
+   '{lift,power_backup,wifi,security,ac,geyser,washing_machine,refrigerator,modular_kitchen,wardrobe,bed,balcony}',
+   'bengaluru','koramangala','5th Block, 80 Feet Road','560034',7,6),
+
+  ('b0000000-0000-4000-8000-000000000041','a0000000-0000-4000-8000-000000000005','PUBLISHED',
+   'Female flatmate wanted in Powai','Sharing a 2BHK with one other woman. Quiet building, ten minutes from Hiranandani. Vegetarian kitchen, no exceptions on that.',
+   'PRIVATE_ROOM','FLATMATE','SEMI_FURNISHED',21000,42000,2000,false,'VEG_ONLY',false,false,false,false,
+   '{BACHELOR_FEMALE,WORKING_PROFESSIONALS,STUDENTS}',1,1,1,8,14,260,'NONE',
+   '{lift,power_backup,wifi,security,cctv,water_supply_24x7,geyser,washing_machine,wardrobe,bed}',
+   'mumbai','powai','Central Avenue','400076',14,11),
+
+  ('b0000000-0000-4000-8000-000000000042','a0000000-0000-4000-8000-000000000002','PUBLISHED',
+   'Share my 2BHK in Baner, pet friendly','I have a dog, so you need to be fine with that. Big living room, both of us work from home some days so the wifi is genuinely good.',
+   'PRIVATE_ROOM','FLATMATE','SEMI_FURNISHED',14000,28000,1200,false,'NON_VEG_ALLOWED',true,true,true,false,
+   '{WORKING_PROFESSIONALS,ANYONE}',1,1,1,2,7,240,'TWO_WHEELER',
+   '{lift,power_backup,wifi,security,geyser,washing_machine,refrigerator,wardrobe,bed,balcony,park}',
+   'pune','baner','Veerbhadra Nagar','411045',3,6),
+
+  ('b0000000-0000-4000-8000-000000000043','a0000000-0000-4000-8000-000000000006','PUBLISHED',
+   'Twin sharing with a flatmate in HSR Layout','Sharing my room in a 2BHK, so this is properly budget. Suits someone new to the city who wants company rather than a lease.',
+   'SHARED_ROOM','FLATMATE','FULLY_FURNISHED',9000,18000,800,true,'EGGETARIAN',false,false,true,false,
+   '{STUDENTS,BACHELOR_MALE,WORKING_PROFESSIONALS}',1,1,0,1,4,150,'NONE',
+   '{power_backup,wifi,security,geyser,washing_machine,wardrobe,bed}',
+   'bengaluru','hsr-layout','Sector 2, 27th Main','560102',5,3),
+
+  ('b0000000-0000-4000-8000-000000000044','a0000000-0000-4000-8000-000000000001','PUBLISHED',
+   'Flatmate for a quiet 3BHK in Gachibowli','Third room going in a flat shared by two of us. Early sleepers, no parties. Walking distance to the tech park.',
+   'PRIVATE_ROOM','FLATMATE','SEMI_FURNISHED',13500,27000,1000,false,'NO_PREFERENCE',false,false,false,false,
+   '{WORKING_PROFESSIONALS,BACHELOR_MALE}',1,1,1,5,9,230,'TWO_WHEELER',
+   '{lift,power_backup,wifi,security,cctv,geyser,modular_kitchen,wardrobe,bed}',
+   'hyderabad','gachibowli','Kondapur Road','500032',10,6)
+
+) as v(
+  id, owner_id, status, title, description,
+  flat_type, listing_kind, furnishing, rent, deposit, maintenance, maintenance_included,
+  food_pref, pets, smoking, drinking, couples,
+  tenant_prefs, bedrooms, bathrooms, balconies, floor_number, total_floors,
+  carpet_area, parking, amenities,
+  city_slug, locality_slug, address_line, pincode, available_in_days, min_stay
+)
+join public.cities     c on c.slug = v.city_slug
+join public.localities l on l.slug = v.locality_slug and l.city_id = c.id
+on conflict (id) do nothing;

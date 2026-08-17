@@ -1,4 +1,7 @@
+import { cache } from "react";
+
 import { createClient } from "./supabase/server";
+import { LISTING_KINDS, type ListingKind } from "./categories";
 import { PAGE_SIZE, RENT_CEILING, RENT_FLOOR, type Filters } from "./filters";
 import {
   AMENITY_LABELS,
@@ -57,9 +60,11 @@ export type ListingCardData = Omit<
   | "locality_slug"
   | "available_from"
   | "photo_count"
+  | "listing_kind"
 > & {
   id: string;
   title: string;
+  listing_kind: Enums["listing_kind"];
   rent: number;
   deposit: number;
   flat_type: Enums["flat_type"];
@@ -91,6 +96,7 @@ const CARD_COLUMNS = [
   "rent",
   "deposit",
   "flat_type",
+  "listing_kind",
   "furnishing",
   "food_pref",
   "pets_allowed",
@@ -150,6 +156,13 @@ function buildListingQuery(
 
   if (filters.city) query = query.eq("city_slug", filters.city);
   if (filters.locality.length) query = query.in("locality_slug", filters.locality);
+
+  // listing_kind is an enum, so an unrecognised value would raise "invalid
+  // input value for enum" rather than matching nothing — same hazard as the
+  // flat_type filters below, same whitelist treatment.
+  if (LISTING_KINDS.includes(filters.kind as ListingKind)) {
+    query = query.eq("listing_kind", filters.kind as ListingKind);
+  }
 
   // Enum and date values must be whitelisted before they reach Postgres.
   // Postgres REJECTS an unknown enum label with "invalid input value for enum"
@@ -255,7 +268,64 @@ export async function searchListings(filters: Filters): Promise<SearchResult> {
   };
 }
 
-export async function getCities(): Promise<City[]> {
+export type ListingPhoto = {
+  id: string;
+  card_path: string;
+  full_path: string;
+  blur_data_url: string | null;
+  width: number | null;
+  height: number | null;
+  position: number;
+};
+
+export type ListingDetail = ListingsPublicRow & { photos: ListingPhoto[] };
+
+/**
+ * Full listing for the detail page. Returns null for anything not published,
+ * which the route turns into a 404 — a draft or rented listing must not be
+ * reachable by guessing its id.
+ *
+ * Contact details are deliberately absent: they only ever come from the
+ * reveal_contact RPC, which meters them.
+ */
+export async function getListingById(id: string): Promise<ListingDetail | null> {
+  // Reject anything that is not a uuid before querying. Postgres raises on a
+  // malformed uuid comparison rather than returning zero rows.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return null;
+  }
+
+  const supabase = await createClient();
+
+  const { data: listing, error } = await supabase
+    .from("listings_public")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw new Error(`Could not load listing: ${error.message}`);
+  if (!listing) return null;
+
+  const { data: photos, error: photoError } = await supabase
+    .from("listing_photos")
+    .select("id, card_path, full_path, blur_data_url, width, height, position")
+    .eq("listing_id", id)
+    .order("position");
+
+  if (photoError) {
+    throw new Error(`Could not load listing photos: ${photoError.message}`);
+  }
+
+  return { ...listing, photos: photos ?? [] };
+}
+
+/**
+ * Wrapped in React's cache because the search route now needs the city list in
+ * two places — the masthead, which names the city outside the Suspense
+ * boundary, and the results query inside it. Without the memo that is two
+ * identical round trips for a six-row table on every request.
+ */
+export const getCities = cache(async function getCities(): Promise<City[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("cities")
@@ -264,6 +334,58 @@ export async function getCities(): Promise<City[]> {
     .order("name");
 
   if (error) throw new Error(`Could not load cities: ${error.message}`);
+  return data ?? [];
+});
+
+export type CityWithCount = City & { listingCount: number };
+
+/**
+ * Cities plus how many published homes each one currently has, for the landing
+ * page city grid.
+ *
+ * One head-count per city rather than a single grouped query: PostgREST has no
+ * GROUP BY, and six parallel `count(*)` probes against the city_slug index is
+ * cheaper than pulling every published row back to tally in JS. Counts are
+ * shown so an empty city reads as "nothing here yet" rather than as a dead link.
+ */
+export async function getCitiesWithCounts(): Promise<CityWithCount[]> {
+  const supabase = await createClient();
+  const cities = await getCities();
+
+  const counts = await Promise.all(
+    cities.map(async (city) => {
+      const { count, error } = await supabase
+        .from("listings_public")
+        .select("id", { count: "exact", head: true })
+        .eq("city_slug", city.slug);
+
+      if (error) {
+        throw new Error(`Could not count listings in ${city.slug}: ${error.message}`);
+      }
+      return count ?? 0;
+    }),
+  );
+
+  return cities.map((city, i) => ({ ...city, listingCount: counts[i] ?? 0 }));
+}
+
+/**
+ * Newest published homes for the landing page shelf. Same column set and same
+ * ordering as page one of an unfiltered search, so a card looks identical
+ * wherever it appears.
+ */
+export async function getNewestListings(limit = 6): Promise<ListingCardData[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("listings_public")
+    .select(CARD_COLUMNS)
+    .order("published_at", { ascending: false })
+    .order("id", { ascending: true })
+    .limit(limit)
+    .overrideTypes<ListingCardData[]>();
+
+  if (error) throw new Error(`Could not load newest listings: ${error.message}`);
   return data ?? [];
 }
 

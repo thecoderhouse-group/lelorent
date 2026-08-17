@@ -45,6 +45,13 @@ export const SORT_LABELS: Record<SortKey, string> = {
 export const filterParsers = {
   q: parseAsString.withDefault(""),
   city: parseAsString.withDefault(""),
+  /**
+   * The category tab (listings.listing_kind). Single-valued, and kept separate
+   * from `type`: `kind` is the coarse cut the tabs make, `type` is the
+   * flat_type checkbox list in the sidebar. They compose — "Flatmates, but
+   * only private rooms" is a sentence the URL can express.
+   */
+  kind: parseAsString.withDefault(""),
   locality: parseAsArrayOf(parseAsString).withDefault([]),
   type: parseAsArrayOf(parseAsString).withDefault([]),
   rentMin: parseAsInteger.withDefault(RENT_FLOOR),
@@ -145,6 +152,8 @@ export function describeActiveFilters(
  * Values that reset the whole panel. Sort is a view preference, not a filter,
  * so it survives a reset. City survives too: clearing it would dump the user
  * from "Pune" back to all six metros, which reads as a bug rather than a reset.
+ * `kind` survives for the same reason — it is the tab the user is standing on,
+ * and the panel's reset button is not how anyone expects to leave a tab.
  *
  * Deliberately not `as const` — that would make the arrays `readonly []`, which
  * nuqs's setter will not accept.

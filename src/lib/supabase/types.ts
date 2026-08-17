@@ -215,6 +215,7 @@ export type Database = {
           food_pref: Database["public"]["Enums"]["food_pref"]
           furnishing: Database["public"]["Enums"]["furnishing"]
           id: string
+          listing_kind: Database["public"]["Enums"]["listing_kind"]
           locality: string
           locality_id: number
           maintenance: number
@@ -244,7 +245,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           carpet_area_sqft?: number | null
-          city: string
+          city?: string
           city_id: number
           couples_allowed?: boolean
           created_at?: string
@@ -257,7 +258,8 @@ export type Database = {
           food_pref?: Database["public"]["Enums"]["food_pref"]
           furnishing?: Database["public"]["Enums"]["furnishing"]
           id?: string
-          locality: string
+          listing_kind: Database["public"]["Enums"]["listing_kind"]
+          locality?: string
           locality_id: number
           maintenance?: number
           maintenance_included?: boolean
@@ -299,6 +301,7 @@ export type Database = {
           food_pref?: Database["public"]["Enums"]["food_pref"]
           furnishing?: Database["public"]["Enums"]["furnishing"]
           id?: string
+          listing_kind?: Database["public"]["Enums"]["listing_kind"]
           locality?: string
           locality_id?: number
           maintenance?: number
@@ -576,6 +579,7 @@ export type Database = {
           food_pref: Database["public"]["Enums"]["food_pref"] | null
           furnishing: Database["public"]["Enums"]["furnishing"] | null
           id: string | null
+          listing_kind: Database["public"]["Enums"]["listing_kind"] | null
           locality: string | null
           locality_id: number | null
           locality_slug: string | null
@@ -673,6 +677,7 @@ export type Database = {
         | "INDEPENDENT_HOUSE"
       food_pref: "VEG_ONLY" | "EGGETARIAN" | "NON_VEG_ALLOWED" | "NO_PREFERENCE"
       furnishing: "UNFURNISHED" | "SEMI_FURNISHED" | "FULLY_FURNISHED"
+      listing_kind: "FLAT" | "ROOM" | "FLATMATE" | "PG"
       listing_status: "DRAFT" | "PUBLISHED" | "RENTED" | "EXPIRED" | "REMOVED"
       parking_type: "NONE" | "TWO_WHEELER" | "FOUR_WHEELER" | "BOTH"
       plan_code: "FREE" | "PREMIUM_1M"
@@ -836,6 +841,7 @@ export const Constants = {
       ],
       food_pref: ["VEG_ONLY", "EGGETARIAN", "NON_VEG_ALLOWED", "NO_PREFERENCE"],
       furnishing: ["UNFURNISHED", "SEMI_FURNISHED", "FULLY_FURNISHED"],
+      listing_kind: ["FLAT", "ROOM", "FLATMATE", "PG"],
       listing_status: ["DRAFT", "PUBLISHED", "RENTED", "EXPIRED", "REMOVED"],
       parking_type: ["NONE", "TWO_WHEELER", "FOUR_WHEELER", "BOTH"],
       plan_code: ["FREE", "PREMIUM_1M"],
