@@ -173,7 +173,7 @@ async function Results({ filters }: { filters: Filters }) {
           <ActiveFilters localityNames={localityNames} />
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {listings.length === 0 ? (
             <EmptyState hasFilters={chips.length > 0} />
           ) : (
@@ -207,7 +207,7 @@ function ResultsSkeleton() {
       </aside>
       <div className="min-w-0 flex-1">
         <div className="h-9 w-40 animate-pulse rounded bg-muted" />
-        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {Array.from({ length: PAGE_SIZE }).map((_, i) => (
             <ListingCardSkeleton key={i} />
           ))}

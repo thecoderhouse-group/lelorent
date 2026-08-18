@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { CalendarBlank, Dog, ForkKnife, MapPin, Ruler } from "@phosphor-icons/react/ssr";
+import {
+  CalendarBlank,
+  Dog,
+  ForkKnife,
+  ImageSquare,
+  MapPin,
+  Ruler,
+} from "@phosphor-icons/react/ssr";
 
 import {
   FLAT_TYPE_LABELS,
@@ -12,36 +19,62 @@ import { storageUrl, type ListingCardData } from "@/lib/listings";
 import { cn } from "@/lib/utils";
 
 /**
+ * TEMPORARY — stand-in artwork so the grid can be judged with images in it
+ * while Storage is still empty. Delete this constant, the PLACEHOLDERS array,
+ * the branch that uses them, and public/placeholders/ to remove the feature
+ * entirely; nothing else references any of it.
+ *
+ * Local SVG rather than a remote placeholder service: this renders offline,
+ * adds no third-party request to the page, and cannot start 404ing later.
+ */
+const SHOW_PLACEHOLDER_PHOTOS = true;
+
+const PLACEHOLDERS = [
+  "/placeholders/room-1.svg",
+  "/placeholders/room-2.svg",
+  "/placeholders/room-3.svg",
+  "/placeholders/room-4.svg",
+  "/placeholders/room-5.svg",
+  "/placeholders/room-6.svg",
+];
+
+/** Stable per listing, so a card keeps its image across renders and pages. */
+function placeholderFor(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return PLACEHOLDERS[hash % PLACEHOLDERS.length]!;
+}
+
+/**
  * Photo slot.
  *
- * The no-photo state is deliberately designed rather than a grey box: it is a
- * nameplate carrying the flat type, which is on-direction for the signage
- * language and stays legible in a grid. Listings without photos are a real
- * and permanent state (owners publish before uploading), not a dev artifact.
+ * The no-photo state is quiet on purpose. It used to be a green enamel plate
+ * with a scored grid and the flat type set 24px in mono — a maximally loud
+ * treatment for the absence of content. In a results grid where most listings
+ * have no photo yet, that made three saturated slabs the dominant visual of
+ * the whole page and set the mood for the product.
+ *
+ * Now it is a neutral surface a half-step off the card, one small icon and a
+ * label. The flat type is not repeated here: it is already a chip beside the
+ * rent, six millimetres below.
  */
 function PhotoSlot({ listing }: { listing: ListingCardData }) {
-  const src = storageUrl(listing.cover_card_path);
-  const flatType = FLAT_TYPE_LABELS[listing.flat_type] ?? listing.flat_type;
+  const src =
+    storageUrl(listing.cover_card_path) ??
+    (SHOW_PLACEHOLDER_PHOTOS ? placeholderFor(listing.id) : null);
 
   if (!src) {
     return (
       <div
-        className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-plate"
+        className="flex aspect-3/2 flex-col items-center justify-center gap-2.5 border-b border-hairline bg-secondary/60"
         aria-hidden="true"
       >
-        {/* Faint rule grid, the way an enamel plate is scored. */}
-        <div
-          className="absolute inset-0 opacity-[0.14]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, var(--plate-muted) 1px, transparent 1px), linear-gradient(to bottom, var(--plate-muted) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
+        <ImageSquare
+          size={26}
+          weight="light"
+          className="text-muted-foreground/45"
         />
-        <span className="relative font-mono text-2xl font-medium tracking-tight text-plate-foreground/85">
-          {flatType}
-        </span>
-        <span className="sign-label absolute bottom-3 text-plate-muted">
+        <span className="text-[0.6875rem] tracking-wide text-muted-foreground/70">
           No photos yet
         </span>
       </div>
@@ -49,7 +82,7 @@ function PhotoSlot({ listing }: { listing: ListingCardData }) {
   }
 
   return (
-    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+    <div className="relative aspect-3/2 overflow-hidden bg-muted">
       {/* eslint-disable-next-line @next/next/no-img-element -- variants are
           pre-compressed to exact display size at upload, so next/image
           optimisation would only burn transformation quota. */}
@@ -57,7 +90,7 @@ function PhotoSlot({ listing }: { listing: ListingCardData }) {
         src={src}
         alt={`${FLAT_TYPE_LABELS[listing.flat_type]} in ${listing.locality}, ${listing.city}`}
         width={640}
-        height={480}
+        height={427}
         loading="lazy"
         decoding="async"
         className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
@@ -83,8 +116,8 @@ function Fact({
   children: React.ReactNode;
 }) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-      <Icon size={14} className="shrink-0" aria-hidden="true" />
+    <span className="inline-flex items-center gap-1 text-[0.6875rem] text-muted-foreground">
+      <Icon size={12} className="shrink-0" aria-hidden="true" />
       <span className="truncate">{children}</span>
     </span>
   );
@@ -99,9 +132,9 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card",
-        "transition-[border-color,transform] duration-200 ease-out",
-        "hover:border-primary/45 focus-within:border-primary/45",
+        "group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-soft",
+        "transition-[border-color,transform,box-shadow] duration-200 ease-out",
+        "hover:border-primary/45 hover:shadow-lift focus-within:border-primary/45",
         "active:translate-y-px motion-reduce:active:translate-y-0",
       )}
     >
@@ -119,21 +152,21 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="tnum text-xl font-semibold leading-none text-foreground">
+      <div className="flex flex-1 flex-col gap-2 p-3.5">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="tnum text-base font-semibold leading-none text-foreground">
             {formatRupees(listing.rent)}
-            <span className="ml-1 font-sans text-xs font-normal text-muted-foreground">
+            <span className="ml-1 font-sans text-[0.6875rem] font-normal text-muted-foreground">
               /mo
             </span>
           </p>
-          <span className="sign-label shrink-0 rounded-full bg-secondary px-2 py-1 text-secondary-foreground">
+          <span className="sign-label shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-secondary-foreground">
             {flatType}
           </span>
         </div>
 
         <div className="min-w-0">
-          <h3 className="truncate text-[0.9375rem] font-medium leading-snug">
+          <h3 className="truncate text-sm font-medium leading-snug">
             {/* Whole card is the hit target via the stretched link, but only
                 the title is in the tab order, so the grid stays navigable. */}
             <Link
@@ -143,13 +176,13 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
               {listing.title}
             </Link>
           </h3>
-          <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
-            <MapPin size={14} className="shrink-0" aria-hidden="true" />
+          <p className="mt-0.5 flex items-center gap-1 truncate text-[0.6875rem] text-muted-foreground">
+            <MapPin size={12} className="shrink-0" aria-hidden="true" />
             {listing.locality}, {listing.city}
           </p>
         </div>
 
-        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1">
+        <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-0.5">
           <Fact icon={ForkKnife}>{food}</Fact>
           {listing.pets_allowed && <Fact icon={Dog}>Pets ok</Fact>}
           {listing.carpet_area_sqft ? (
@@ -157,17 +190,17 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-hairline pt-3">
+        <div className="flex items-center justify-between gap-2 border-t border-hairline pt-2.5">
           <span
             className={cn(
-              "inline-flex items-center gap-1.5 text-xs",
+              "inline-flex items-center gap-1 text-[0.6875rem]",
               isAvailableNow ? "font-medium text-primary" : "text-muted-foreground",
             )}
           >
-            <CalendarBlank size={14} className="shrink-0" aria-hidden="true" />
+            <CalendarBlank size={12} className="shrink-0" aria-hidden="true" />
             {availability}
           </span>
-          <span className="truncate text-xs text-muted-foreground">
+          <span className="truncate text-[0.6875rem] text-muted-foreground">
             {FURNISHING_LABELS[listing.furnishing]}
           </span>
         </div>
@@ -179,15 +212,15 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
 export function ListingCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
-      <div className="aspect-[4/3] animate-pulse bg-muted" />
-      <div className="flex flex-col gap-3 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="h-5 w-24 animate-pulse rounded bg-muted" />
-          <div className="h-5 w-14 animate-pulse rounded-full bg-muted" />
+      <div className="aspect-3/2 animate-pulse bg-muted" />
+      <div className="flex flex-col gap-2 p-3.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-12 animate-pulse rounded-full bg-muted" />
         </div>
-        <div className="h-4 w-full animate-pulse rounded bg-muted" />
-        <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
-        <div className="mt-1 h-3 w-1/2 animate-pulse rounded bg-muted" />
+        <div className="h-3.5 w-full animate-pulse rounded bg-muted" />
+        <div className="h-2.5 w-2/3 animate-pulse rounded bg-muted" />
+        <div className="mt-0.5 h-2.5 w-1/2 animate-pulse rounded bg-muted" />
       </div>
     </div>
   );
