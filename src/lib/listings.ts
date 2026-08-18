@@ -348,7 +348,9 @@ export type CityWithCount = City & { listingCount: number };
  * cheaper than pulling every published row back to tally in JS. Counts are
  * shown so an empty city reads as "nothing here yet" rather than as a dead link.
  */
-export async function getCitiesWithCounts(): Promise<CityWithCount[]> {
+export const getCitiesWithCounts = cache(async function getCitiesWithCounts(): Promise<
+  CityWithCount[]
+> {
   const supabase = await createClient();
   const cities = await getCities();
 
@@ -367,7 +369,7 @@ export async function getCitiesWithCounts(): Promise<CityWithCount[]> {
   );
 
   return cities.map((city, i) => ({ ...city, listingCount: counts[i] ?? 0 }));
-}
+});
 
 /**
  * Newest published homes for the landing page shelf. Same column set and same

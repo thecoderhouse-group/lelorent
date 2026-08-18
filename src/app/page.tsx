@@ -16,12 +16,15 @@ import {
   UsersThree,
 } from "@phosphor-icons/react/ssr";
 
+import { CityArt } from "@/components/home/city-art";
+import { HeroArt } from "@/components/home/hero-art";
 import { HeroSearch } from "@/components/home/hero-search";
 import { ListingCard, ListingCardSkeleton } from "@/components/listing-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CATEGORIES, categoryHref, type CategoryKey } from "@/lib/categories";
-import { getCities, getCitiesWithCounts, getNewestListings } from "@/lib/listings";
+import { getCitiesWithCounts, getNewestListings } from "@/lib/listings";
+import { cn } from "@/lib/utils";
 
 const CATEGORY_ICONS = {
   all: SquaresFour,
@@ -99,36 +102,46 @@ function TextLink({ href, children }: { href: string; children: React.ReactNode 
    -------------------------------------------------------------------------- */
 
 async function Hero() {
-  const cities = await getCities();
+  // getCitiesWithCounts is memoised per request, so the banner's live count
+  // and the city grid below share one set of queries rather than doubling them.
+  const cities = await getCitiesWithCounts();
+  const total = cities.reduce((sum, city) => sum + city.listingCount, 0);
 
   return (
-    <section className="relative overflow-hidden bg-plate">
-      {/* Scored enamel, same treatment as the no-photo card slot. It is the
-          one texture in the system, so reusing it here keeps the landing page
-          inside the signage language instead of inventing a hero gradient. */}
+    <section className="paper-wash relative overflow-hidden border-b border-hairline">
+      {/* Scored rule grid, same treatment as the no-photo card slot — the one
+          texture in the system. Drawn in the border colour rather than on a
+          dark plate, so it reads as graph paper: the signage language survives
+          the move to light without a near-black band carrying it. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 opacity-[0.13]"
+        className="absolute inset-0 opacity-70"
         style={{
           backgroundImage:
-            "linear-gradient(to right, var(--plate-muted) 1px, transparent 1px), linear-gradient(to bottom, var(--plate-muted) 1px, transparent 1px)",
+            "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)",
           backgroundSize: "34px 34px",
+          maskImage:
+            "radial-gradient(70rem 40rem at 20% 0%, #000 20%, transparent 78%)",
         }}
       />
 
       <div className="relative mx-auto w-full max-w-[1400px] px-4 py-16 sm:px-6 lg:py-24">
+        {/* Two columns from lg: the copy never competes with the art, and the
+            right-hand emptiness that made the hero look unfinished at desktop
+            width now carries the banner. */}
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] xl:gap-16">
         <div className="max-w-3xl">
-          <p className="sign-label text-plate-accent">
+          <p className="sign-label text-primary">
             Pune · Mumbai · Bengaluru · Hyderabad · Delhi · Gurugram
           </p>
 
-          <h1 className="mt-5 text-[2.1rem] font-semibold leading-[1.08] tracking-tight text-plate-foreground sm:text-5xl lg:text-[3.5rem]">
+          <h1 className="mt-5 text-[2.1rem] font-semibold leading-[1.08] tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem]">
             Rent a home in India,
             <br />
             straight from the owner.
           </h1>
 
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-plate-foreground/75 sm:text-lg">
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             Flats, private rooms and PG beds posted by the people who actually
             hold the keys. Filter by what genuinely decides it — rent, food
             rules, pets, who the place is for — and talk to the owner directly.
@@ -139,12 +152,12 @@ async function Hero() {
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-plate-muted">Popular right now</span>
+            <span className="text-xs text-muted-foreground">Popular right now</span>
             {cities.slice(0, 4).map((city) => (
               <Link
                 key={city.slug}
                 href={`/search?city=${city.slug}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/12 px-3 py-1.5 text-xs font-medium text-plate-foreground/85 transition-colors hover:border-plate-accent/60 hover:text-plate-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plate-accent focus-visible:ring-offset-2 focus-visible:ring-offset-plate"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground/85 shadow-soft transition-colors hover:border-primary/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <MapPin size={12} weight="bold" aria-hidden="true" />
                 {city.name}
@@ -153,7 +166,23 @@ async function Hero() {
           </div>
         </div>
 
-        <ul className="mt-12 grid gap-x-8 gap-y-5 border-t border-white/10 pt-8 sm:grid-cols-3 lg:mt-16">
+          {/* Banner column. The stat is read live rather than written into the
+              copy, so it cannot quietly become a lie as inventory changes. */}
+          <div className="relative">
+            <HeroArt className="w-full text-foreground" />
+
+            <div className="absolute bottom-6 left-2 rounded-lg border border-border bg-card px-5 py-4 shadow-lift">
+              <p className="tnum text-2xl font-semibold leading-none text-foreground">
+                {total}
+              </p>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                homes live across {cities.length} cities
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <ul className="mt-12 grid gap-x-8 gap-y-5 border-t border-hairline pt-8 sm:grid-cols-3 lg:mt-16">
           {[
             {
               icon: CurrencyInr,
@@ -172,14 +201,12 @@ async function Hero() {
             },
           ].map(({ icon: Icon, title, copy }) => (
             <li key={title} className="flex gap-3">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md bg-plate-accent/15 text-plate-accent">
+              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                 <Icon size={18} weight="bold" aria-hidden="true" />
               </span>
               <div>
-                <p className="text-sm font-semibold text-plate-foreground">
-                  {title}
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-plate-foreground/65">
+                <p className="text-sm font-semibold text-foreground">{title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {copy}
                 </p>
               </div>
@@ -192,66 +219,102 @@ async function Hero() {
 }
 
 /* -----------------------------------------------------------------------------
-   City grid — the step the whole flow hinges on. Real links, not a dropdown,
+   City picker — the step the whole flow hinges on. Real links, not a dropdown,
    so each city page is crawlable and shareable.
+
+   Laid out as compact tiles beside the signpost art. The tiles carry only what
+   decides the click — the city and how much is in it. State and the arrow
+   affordance were padding the old cards to five times the height they needed
+   and pushing the six cities across two full-width rows.
    -------------------------------------------------------------------------- */
 
-async function CityGrid() {
+async function CityPicker() {
   const cities = await getCitiesWithCounts();
 
   return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {cities.map((city) => (
-        <li key={city.slug}>
-          <Link
-            href={`/search?city=${city.slug}`}
-            className="group flex items-center justify-between gap-4 rounded-lg border border-border bg-card p-5 transition-[border-color,transform] duration-200 ease-out hover:border-primary/45 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:active:translate-y-0"
-          >
-            <div className="min-w-0">
-              <p className="truncate text-lg font-semibold tracking-tight">
-                {city.name}
-              </p>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                {city.state}
-              </p>
-              <p className="mt-3 text-xs text-muted-foreground">
-                <span className="tnum font-semibold text-foreground">
-                  {city.listingCount}
-                </span>{" "}
-                {city.listingCount === 1 ? "home" : "homes"} listed
-              </p>
-            </div>
+    // Roughly 55/45. The art is a wide strip now, so it can take the larger
+    // share without dominating vertically, and the tiles get enough width to
+    // carry an icon without crowding.
+    <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:gap-16">
+      {/* Art first in the source on large screens, but ordered after the tiles
+          on small ones: on a phone the actionable list should come first. */}
+      <CityArt
+        cities={cities}
+        className="order-2 w-full text-foreground lg:order-1"
+      />
 
-            <span
-              aria-hidden="true"
-              className="flex size-10 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground"
+      <ul className="order-1 grid grid-cols-2 gap-4 lg:order-2">
+        {cities.map((city) => (
+          <li key={city.slug}>
+            <Link
+              href={`/search?city=${city.slug}`}
+              className={cn(
+                "group flex h-full items-center gap-3 rounded-lg border border-border px-4 py-3.5 shadow-soft",
+                // Gradient runs from the lighter surface into the card, so the
+                // tile reads as a lit face rather than a flat rectangle. Both
+                // stops are tokens, so it inverts correctly with the theme.
+                "bg-gradient-to-br from-secondary via-card to-card",
+                "transition-[border-color,transform,box-shadow] duration-200 ease-out",
+                "hover:border-primary/50 hover:shadow-lift active:translate-y-px",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                "motion-reduce:active:translate-y-0",
+              )}
             >
-              <ArrowRight size={17} weight="bold" />
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/12 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground">
+                <MapPin size={16} weight="bold" aria-hidden="true" />
+              </span>
+
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold tracking-tight">
+                  {city.name}
+                </span>
+                <span className="mt-0.5 block text-[0.6875rem] text-muted-foreground">
+                  <span className="tnum font-semibold text-foreground">
+                    {city.listingCount}
+                  </span>{" "}
+                  {city.listingCount === 1 ? "home" : "homes"}
+                </span>
+              </span>
+
+              <ArrowRight
+                size={13}
+                weight="bold"
+                aria-hidden="true"
+                className="shrink-0 text-muted-foreground/40 transition-[color,transform] duration-200 ease-out group-hover:translate-x-0.5 group-hover:text-primary motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
-function CityGridSkeleton() {
+function CityPickerSkeleton() {
   return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <li
-          key={i}
-          className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card p-5"
-        >
-          <div className="flex w-full flex-col gap-2">
-            <div className="h-5 w-28 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-            <div className="mt-2 h-3 w-24 animate-pulse rounded bg-muted" />
-          </div>
-          <div className="size-10 shrink-0 animate-pulse rounded-md bg-muted" />
-        </li>
-      ))}
-    </ul>
+    <div
+      className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:gap-16"
+      aria-hidden="true"
+    >
+      {/* Reserves the art's box so the tiles do not jump sideways when the
+          real content arrives. Ratio tracks the SVG viewBox. */}
+      <div className="order-2 aspect-760/250 w-full animate-pulse rounded-lg bg-muted/40 lg:order-1" />
+
+      <ul className="order-1 grid grid-cols-2 gap-4 lg:order-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <li
+            key={i}
+            className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3.5"
+          >
+            <div className="size-9 shrink-0 animate-pulse rounded-md bg-muted" />
+            <div className="flex flex-1 flex-col gap-1.5">
+              <div className="h-3.5 w-16 animate-pulse rounded bg-muted" />
+              <div className="h-2.5 w-12 animate-pulse rounded bg-muted" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -260,7 +323,9 @@ function CityGridSkeleton() {
    -------------------------------------------------------------------------- */
 
 async function NewestListings() {
-  const listings = await getNewestListings(6);
+  // Eight, not six: the shelf is a four-column grid, and six would leave a
+  // half-empty second row.
+  const listings = await getNewestListings(8);
 
   if (listings.length === 0) {
     return (
@@ -275,7 +340,7 @@ async function NewestListings() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {listings.map((listing) => (
         <ListingCard key={listing.id} listing={listing} />
       ))}
@@ -285,8 +350,8 @@ async function NewestListings() {
 
 function NewestListingsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
-      {Array.from({ length: 6 }).map((_, i) => (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-hidden="true">
+      {Array.from({ length: 8 }).map((_, i) => (
         <ListingCardSkeleton key={i} />
       ))}
     </div>
@@ -352,8 +417,8 @@ export default function Home() {
           title="Choose your city"
           lede="Pick a city and the listings, localities and filters all narrow to it."
         >
-          <Suspense fallback={<CityGridSkeleton />}>
-            <CityGrid />
+          <Suspense fallback={<CityPickerSkeleton />}>
+            <CityPicker />
           </Suspense>
         </Section>
 
@@ -372,7 +437,7 @@ export default function Home() {
                     <li key={category.key}>
                       <Link
                         href={categoryHref(category)}
-                        className="group flex h-full flex-col gap-3 rounded-lg border border-border bg-card p-6 transition-[border-color,transform] duration-200 ease-out hover:border-primary/45 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:active:translate-y-0"
+                        className="group flex h-full flex-col gap-3 rounded-lg border border-border bg-card p-6 shadow-soft transition-[border-color,transform,box-shadow] duration-200 ease-out hover:border-primary/45 hover:shadow-lift active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:active:translate-y-0"
                       >
                         <span className="flex size-11 items-center justify-center rounded-md bg-secondary text-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                           <Icon size={22} aria-hidden="true" />
@@ -414,7 +479,7 @@ export default function Home() {
               {STEPS.map(({ icon: Icon, title, copy }, index) => (
                 <li
                   key={title}
-                  className="flex flex-col gap-3 rounded-lg border border-border bg-card p-6"
+                  className="flex flex-col gap-3 rounded-lg border border-border bg-card p-6 shadow-soft"
                 >
                   <div className="flex items-center gap-3">
                     <span className="flex size-10 items-center justify-center rounded-md bg-primary/12 text-primary">
@@ -460,23 +525,34 @@ export default function Home() {
 
         {/* Closing CTA, aimed at the other side of the marketplace. */}
         <section className="mx-auto w-full max-w-[1400px] px-4 pb-16 sm:px-6 lg:pb-24">
-          <div className="relative overflow-hidden rounded-xl bg-plate px-6 py-12 sm:px-10 lg:py-16">
+          {/* Tinted green paper rather than the plate: a dark slab here was
+              the second of the two bands that made the page read dark, and the
+              accent surface gives the same "this is the closing note" emphasis
+              without leaving the light palette. */}
+          <div className="relative overflow-hidden rounded-xl border border-primary/15 bg-accent px-6 py-12 shadow-soft sm:px-10 lg:py-16">
             <div
               aria-hidden="true"
-              className="absolute inset-0 opacity-[0.13]"
+              className="absolute inset-0 opacity-40"
               style={{
                 backgroundImage:
-                  "linear-gradient(to right, var(--plate-muted) 1px, transparent 1px), linear-gradient(to bottom, var(--plate-muted) 1px, transparent 1px)",
+                  "linear-gradient(to right, var(--primary) 1px, transparent 1px), linear-gradient(to bottom, var(--primary) 1px, transparent 1px)",
                 backgroundSize: "34px 34px",
+                maskImage:
+                  "radial-gradient(40rem 20rem at 88% 110%, #000 10%, transparent 70%)",
               }}
             />
             <div className="relative flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-xl">
-                <p className="sign-label text-plate-accent">Have a place to let?</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-plate-foreground sm:text-3xl">
+                {/* accent-foreground, not primary: --primary on the --accent
+                    band measures 4.30:1 and misses normal-text AA. This is the
+                    same hue a step darker, and clears 10:1. */}
+                <p className="sign-label text-accent-foreground">
+                  Have a place to let?
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-accent-foreground sm:text-3xl">
                   List it yourself, keep the brokerage
                 </h2>
-                <p className="mt-2.5 text-sm leading-relaxed text-plate-foreground/70 sm:text-base">
+                <p className="mt-2.5 text-sm leading-relaxed text-accent-foreground/80 sm:text-base">
                   Post the flat, set the rent, choose who you want to rent to.
                   Enquiries come to you, not to an agent who marks you up.
                 </p>
@@ -484,7 +560,7 @@ export default function Home() {
 
               <Link
                 href="/listaproperty"
-                className="inline-flex h-12 shrink-0 items-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform hover:brightness-105 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-plate motion-reduce:active:translate-y-0"
+                className="inline-flex h-12 shrink-0 items-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-lift transition-transform hover:brightness-105 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-accent motion-reduce:active:translate-y-0"
               >
                 List a property
                 <ArrowRight size={16} weight="bold" aria-hidden="true" />
