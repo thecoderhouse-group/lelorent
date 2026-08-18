@@ -38,9 +38,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // The two --background values, so the phone's status bar blends into the
+  // page instead of banding it. Update these whenever the ground moves.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f8f6" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d1310" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f6f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#191714" },
   ],
 };
 
@@ -54,11 +56,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${archivo.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        {/* Dark is the product, so it is the default rather than something a
+            viewer has to opt into. Not "system": that hands the decision to
+            the OS and means half the audience never sees the designed default.
+            Light stays fully supported through the toggle.
+
+            storageKey is deliberately NOT the default "theme". A stored
+            preference always beats defaultTheme, so browsers that had already
+            visited kept an old value and never picked up a change of default.
+            Naming an app-specific key retired those entries once. */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
+          storageKey="lelorent-theme"
         >
           <NuqsAdapter>{children}</NuqsAdapter>
         </ThemeProvider>

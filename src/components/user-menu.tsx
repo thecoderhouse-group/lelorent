@@ -9,7 +9,7 @@ export function UserMenu({ user }: { user: CurrentUser | null }) {
     return (
       <Link
         href="/login"
-        className="inline-flex h-9 items-center rounded-md px-3 text-sm font-medium text-plate-foreground/85 transition-colors hover:bg-white/10 hover:text-plate-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-plate"
+        className="inline-flex h-9 items-center rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         Sign in
       </Link>
@@ -24,7 +24,7 @@ export function UserMenu({ user }: { user: CurrentUser | null }) {
       <Link
         href="/dashboard"
         title={label}
-        className="inline-flex items-center gap-2 rounded-md py-1 pl-1 pr-2 text-sm text-plate-foreground/85 transition-colors hover:bg-white/10 hover:text-plate-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-plate"
+        className="inline-flex items-center gap-2 rounded-md py-1 pl-1 pr-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {user.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- provider avatar, fixed 28px, no optimisation worth the quota
@@ -48,7 +48,7 @@ export function UserMenu({ user }: { user: CurrentUser | null }) {
           type="submit"
           aria-label="Sign out"
           title="Sign out"
-          className="inline-flex size-9 items-center justify-center rounded-md text-plate-foreground/70 transition-colors hover:bg-white/10 hover:text-plate-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-plate"
+          className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <SignOut size={17} aria-hidden="true" />
         </button>

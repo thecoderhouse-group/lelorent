@@ -36,7 +36,7 @@ export function SearchInput({ className }: { className?: string }) {
       <MagnifyingGlass
         size={16}
         aria-hidden="true"
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-plate-muted"
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
       />
       <input
         type="search"
@@ -44,7 +44,7 @@ export function SearchInput({ className }: { className?: string }) {
         onChange={(e) => setDraft(e.target.value)}
         placeholder="Search locality, area or listing"
         aria-label="Search listings"
-        className="h-10 w-full rounded-md border border-white/12 bg-white/8 pl-9 pr-9 text-sm text-plate-foreground placeholder:text-plate-muted focus-visible:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 [&::-webkit-search-cancel-button]:hidden"
+        className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 [&::-webkit-search-cancel-button]:hidden"
       />
       {draft && (
         <button
@@ -54,7 +54,7 @@ export function SearchInput({ className }: { className?: string }) {
             setFilters({ q: "", page: 1 });
           }}
           aria-label="Clear search"
-          className="absolute right-2 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded text-plate-muted transition-colors hover:text-plate-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="absolute right-2 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X size={14} weight="bold" aria-hidden="true" />
         </button>

@@ -8,19 +8,43 @@
    LELORENT — "Wayfinding"
 
    Direction: Indian urban signage. Metro directional boards, society
-   nameplates, painted building numbers. Green is used the way it is used on
-   Indian highway signage — as a directional, functional colour — which is what
-   keeps it from reading as decorative neon.
+   nameplates, painted building numbers. The accent is BRASS — the material
+   those nameplates are actually made of — used as a functional, directional
+   colour rather than as decoration.
+
+   The accent was green (hue ~157) through 2026-08. It was replaced because it
+   never read as premium at any lightness: on a dark ground a mid-green sits
+   close to the neutrals in both hue and value, so the interface flattened into
+   a single olive wash. Brass separates from a warm grey by hue AND by value,
+   which is what lets an accent feel deliberate. This was a directional change,
+   not a tuning one — three rounds of adjusting the green's L and C produced no
+   perceptible improvement.
 
    Colour rules held throughout:
-     * ONE accent hue. Everything green on this site is hue ~157 in OKLCH.
+     * ONE accent hue. Everything brass on this site is hue ~72-85 in OKLCH.
        There is no second accent. Semantic red exists only for destructive.
-     * No pure #000 or #fff. Ink and paper both carry a faint green bias so the
-       neutrals read as chosen rather than inherited.
-     * Light and dark are designed as a pair, not inverted. The green INVERTS
-       ROLE between them: on light it is a deep fill with pale text; on dark it
-       is a bright fill with dark text. A single green used for both would
-       either be invisible on paper or glaring on ink.
+     * No pure #000 or #fff. Ink and paper both carry a faint WARM bias, on the
+       same side of neutral as the brass. A cool grey under a warm accent is
+       the specific mistake that makes an interface look muddy: the two casts
+       disagree and the eye reads the screen as dirty rather than as coloured.
+     * Light and dark are designed as a pair, not inverted. The brass INVERTS
+       ROLE between them: on paper it is a deep bronze fill with near-white
+       text; on ink it is a bright fill with dark text. One value used for both
+       would either be invisible on paper or glaring on ink.
+
+   Surface strategy — INK-LED:
+     Dark is the product default and the design's home; light is the supported
+     secondary. Contrast between sections comes from tinted shades of the same
+     ground (--background, --secondary, --accent), never from dropping an
+     inverted band into the middle of a page.
+
+     The plate survives as photo chrome only — the surround behind a real
+     image on the detail page and in the uploader. It is neither a page-level
+     surface nor a stand-in for missing content.
+
+     Depth comes from TINTED shadow (.shadow-soft / .shadow-lift below), which
+     carries the ground's own warmth rather than neutral black, plus hairline
+     borders.
 
    Radius system (documented exception to one-scale, per shape-consistency):
      * cards / inputs / buttons  -> --radius (8px)
@@ -80,115 +104,155 @@
 }
 
 /* -----------------------------------------------------------------------------
-   LIGHT — "paper"
-   Green is a DEEP fill here (L 0.52) so pale text sits on it at >7:1.
+   LIGHT — "paper" (SECONDARY)
+   Brass goes DEEP here, to bronze (L 0.47), so near-white text sits on it at
+   6.8:1 and it still clears 6.7:1 as text on paper.
    -------------------------------------------------------------------------- */
 :root {
-  --background: oklch(0.983 0.005 158);
-  --foreground: oklch(0.190 0.014 162);
+  /* Deepened so a white card actually separates from the page. Paper can only
+     go so far here — white caps the range, so even a much darker ground buys
+     little — which is why on light the card's edge is carried by its border
+     and .shadow-soft rather than by fill difference. Dark has the opposite
+     problem and solves it with a wide fill step; see --card in .dark. */
+  --background: oklch(0.972 0.005 85);
+  --foreground: oklch(0.195 0.012 80);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.190 0.014 162);
+  --card-foreground: oklch(0.195 0.012 80);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.190 0.014 162);
+  --popover-foreground: oklch(0.195 0.012 80);
 
-  --primary: oklch(0.520 0.135 158);
-  --primary-foreground: oklch(0.985 0.006 150);
+  --primary: oklch(0.470 0.098 72);
+  --primary-foreground: oklch(0.990 0.005 85);
 
-  --secondary: oklch(0.955 0.008 158);
-  --secondary-foreground: oklch(0.280 0.016 162);
+  --secondary: oklch(0.957 0.007 85);
+  --secondary-foreground: oklch(0.285 0.014 80);
 
-  --muted: oklch(0.955 0.008 158);
-  /* L 0.48 against L 0.983 paper clears 4.5:1 for secondary copy */
-  --muted-foreground: oklch(0.480 0.013 160);
+  --muted: oklch(0.957 0.007 85);
+  /* L 0.478 against L 0.985 paper clears 6.3:1 for secondary copy */
+  --muted-foreground: oklch(0.478 0.014 80);
 
-  /* tinted green surface for active filter chips, not a second hue */
-  --accent: oklch(0.940 0.028 158);
-  --accent-foreground: oklch(0.330 0.075 160);
+  /* tinted brass surface for active filter chips, not a second hue */
+  --accent: oklch(0.945 0.032 82);
+  --accent-foreground: oklch(0.360 0.070 72);
 
   --destructive: oklch(0.545 0.195 27);
-  --destructive-foreground: oklch(0.985 0.006 150);
+  --destructive-foreground: oklch(0.985 0.006 85);
 
-  --border: oklch(0.900 0.008 158);
-  --hairline: oklch(0.935 0.006 158);
-  --input: oklch(0.895 0.009 158);
-  --ring: oklch(0.520 0.135 158);
+  --border: oklch(0.902 0.007 85);
+  --hairline: oklch(0.936 0.005 85);
+  --input: oklch(0.897 0.008 85);
+  --ring: oklch(0.470 0.098 72);
 
   /* The plate is a brand constant: identical in both themes, the way a real
-     enamel sign does not change colour when the sun goes down. */
-  --plate: oklch(0.240 0.045 163);
-  --plate-foreground: oklch(0.965 0.010 150);
-  --plate-muted: oklch(0.720 0.030 155);
-  /* Accent green for text and icons sitting ON the plate.
-     It has to be its own token, and it has to be the bright green in BOTH
-     themes, because the plate does not change with the theme while --primary
-     does: light-mode --primary on the plate measures 2.97:1 and fails normal
-     text. This one clears 9.6:1 against the same ground. Use --primary for
-     green on paper, --plate-accent for green on the plate. */
-  --plate-accent: oklch(0.780 0.165 156);
+     enamel sign does not change colour when the sun goes down. Photo chrome
+     only — the surround behind a real image on the detail page and uploader. */
+  --plate: oklch(0.262 0.015 80);
+  --plate-foreground: oklch(0.968 0.005 85);
+  --plate-muted: oklch(0.748 0.014 80);
+  /* Brass for text and icons sitting ON the plate. It must be the bright
+     brass in BOTH themes: the plate does not change with the theme while
+     --primary does, and the light-mode bronze on this ground would fail
+     normal text. --primary for brass on paper, --plate-accent on the plate. */
+  --plate-accent: oklch(0.805 0.135 80);
+
+  /* Hue-matched shadow. Tinting toward the paper's own warmth keeps depth
+     looking like light falling on a surface rather than grey soot under a box. */
+  --shadow-hue: 0.300 0.025 70;
+
+  /* Hero/CTA wash. Tracks --primary, so it inverts role with the theme the
+     same way the brass does — the deep bronze tints paper, the bright brass
+     tints ink. */
+  --wash-strong: oklch(0.470 0.098 72 / 0.10);
+  --wash-soft: oklch(0.470 0.098 72 / 0.06);
 
   --radius: 0.5rem;
 
   --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.190 0.014 162);
-  --sidebar-primary: oklch(0.520 0.135 158);
-  --sidebar-primary-foreground: oklch(0.985 0.006 150);
-  --sidebar-accent: oklch(0.940 0.028 158);
-  --sidebar-accent-foreground: oklch(0.330 0.075 160);
-  --sidebar-border: oklch(0.900 0.008 158);
-  --sidebar-ring: oklch(0.520 0.135 158);
+  --sidebar-foreground: oklch(0.195 0.012 80);
+  --sidebar-primary: oklch(0.470 0.098 72);
+  --sidebar-primary-foreground: oklch(0.990 0.005 85);
+  --sidebar-accent: oklch(0.945 0.032 82);
+  --sidebar-accent-foreground: oklch(0.360 0.070 72);
+  --sidebar-border: oklch(0.902 0.007 85);
+  --sidebar-ring: oklch(0.470 0.098 72);
 }
 
 /* -----------------------------------------------------------------------------
-   DARK — "ink"
-   Green INVERTS ROLE: bright fill (L 0.78), dark text on top. Reusing the
-   light-mode deep green here would sink into the background.
+   DARK — "ink" (PRIMARY, the product default)
+   Brass INVERTS ROLE: bright fill (L 0.805), dark text on top. Reusing the
+   light-mode bronze here would sink into the background.
    -------------------------------------------------------------------------- */
 .dark {
-  --background: oklch(0.165 0.014 162);
-  --foreground: oklch(0.965 0.005 150);
+  /* Warm charcoal, not black. The ground carries a faint WARM bias (hue 80 at
+     chroma 0.006) so the neutrals belong to the brass rather than fighting it.
+     A cool or green-biased grey under a warm accent is what reads as cheap —
+     the two casts disagree and the eye registers it as a muddy screen rather
+     than as a chosen colour. Surface steps are wide enough that cards sit
+     above the page instead of floating in the same murk. */
+  --background: oklch(0.205 0.006 80);
+  --foreground: oklch(0.968 0.005 85);
 
-  --card: oklch(0.205 0.016 162);
-  --card-foreground: oklch(0.965 0.005 150);
+  /* Card sits a full 1.36x in luminance above the page. The previous 1.15x
+     step was not enough to register as a separate surface — cards read as
+     "black on black" and the grid looked like flat text on a slab. On a dark
+     ground the eye needs a materially wider step than it does on paper,
+     because everything is compressed into the bottom of the luminance range. */
+  --card: oklch(0.310 0.008 80);
+  --card-foreground: oklch(0.968 0.005 85);
 
-  --popover: oklch(0.205 0.016 162);
-  --popover-foreground: oklch(0.965 0.005 150);
+  --popover: oklch(0.310 0.008 80);
+  --popover-foreground: oklch(0.968 0.005 85);
 
-  --primary: oklch(0.780 0.165 156);
-  --primary-foreground: oklch(0.175 0.032 162);
+  /* Brass: the society nameplate, which is the direction's own material.
+     Clears 9.6:1 on the page and 8.4:1 on a card. */
+  --primary: oklch(0.805 0.135 80);
+  --primary-foreground: oklch(0.205 0.045 80);
 
-  --secondary: oklch(0.262 0.018 162);
-  --secondary-foreground: oklch(0.950 0.005 150);
+  /* Kept above --card so chips and inset surfaces still read on top of one. */
+  --secondary: oklch(0.365 0.009 80);
+  --secondary-foreground: oklch(0.958 0.005 85);
 
-  --muted: oklch(0.262 0.018 162);
-  /* L 0.72 against L 0.165 ground clears 4.5:1 */
-  --muted-foreground: oklch(0.720 0.014 158);
+  --muted: oklch(0.365 0.009 80);
+  /* L 0.770 against the L 0.205 ground clears 8.6:1 */
+  --muted-foreground: oklch(0.770 0.012 80);
 
-  --accent: oklch(0.300 0.048 160);
-  --accent-foreground: oklch(0.880 0.100 155);
+  --accent: oklch(0.375 0.055 80);
+  --accent-foreground: oklch(0.885 0.095 85);
 
   --destructive: oklch(0.680 0.185 25);
   --destructive-foreground: oklch(0.160 0.020 25);
 
-  --border: oklch(1 0 0 / 11%);
-  --hairline: oklch(1 0 0 / 7%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.780 0.165 156);
+  /* Raised with the card: an overlay tuned to a darker surface stops reading
+     as an edge once the surface beneath it is lifted. */
+  --border: oklch(1 0 0 / 16%);
+  --hairline: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 20%);
+  --ring: oklch(0.805 0.135 80);
 
-  --plate: oklch(0.240 0.045 163);
-  --plate-foreground: oklch(0.965 0.010 150);
-  --plate-muted: oklch(0.720 0.030 155);
-  --plate-accent: oklch(0.780 0.165 156);
+  --plate: oklch(0.262 0.015 80);
+  --plate-foreground: oklch(0.968 0.005 85);
+  --plate-muted: oklch(0.748 0.014 80);
+  --plate-accent: oklch(0.805 0.135 80);
 
-  --sidebar: oklch(0.205 0.016 162);
-  --sidebar-foreground: oklch(0.965 0.005 150);
-  --sidebar-primary: oklch(0.780 0.165 156);
-  --sidebar-primary-foreground: oklch(0.175 0.032 162);
-  --sidebar-accent: oklch(0.300 0.048 160);
-  --sidebar-accent-foreground: oklch(0.880 0.100 155);
-  --sidebar-border: oklch(1 0 0 / 11%);
-  --sidebar-ring: oklch(0.780 0.165 156);
+  /* Darker and more opaque on ink: a shadow tuned for paper vanishes here. */
+  --shadow-hue: 0.080 0.018 70;
+
+  --wash-strong: oklch(0.805 0.135 80 / 0.09);
+  --wash-soft: oklch(0.805 0.135 80 / 0.05);
+
+  /* Mirrors the surface tokens above, one for one. These are the shadcn
+     sidebar contract; left on the old values they would reintroduce the exact
+     green cast everything else just shed. */
+  --sidebar: oklch(0.310 0.008 80);
+  --sidebar-foreground: oklch(0.968 0.005 85);
+  --sidebar-primary: oklch(0.805 0.135 80);
+  --sidebar-primary-foreground: oklch(0.205 0.045 80);
+  --sidebar-accent: oklch(0.375 0.055 80);
+  --sidebar-accent-foreground: oklch(0.885 0.095 85);
+  --sidebar-border: oklch(1 0 0 / 16%);
+  --sidebar-ring: oklch(0.805 0.135 80);
 }
 
 @layer base {
@@ -225,12 +289,35 @@
 }
 
 @layer utilities {
-  /* Rent amounts. Mono + tight tracking so ₹32,000 reads as one unit and
+  /* Rent amounts. Mono + tight tracking so â‚¹32,000 reads as one unit and
      columns of prices line up down a results grid. */
   .tnum {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
+  }
+
+  /* Depth on paper. Two stops — a tight contact shadow plus a wide ambient
+     one — because a single blur reads as a sticker. Both carry --shadow-hue
+     rather than black. */
+  .shadow-soft {
+    box-shadow:
+      0 1px 2px oklch(var(--shadow-hue) / 0.05),
+      0 4px 14px oklch(var(--shadow-hue) / 0.05);
+  }
+
+  .shadow-lift {
+    box-shadow:
+      0 2px 4px oklch(var(--shadow-hue) / 0.06),
+      0 14px 34px oklch(var(--shadow-hue) / 0.08);
+  }
+
+  /* The hero wash: an off-centre radial in the accent hue. Deliberately not a
+     45-degree linear fade, which is the gradient every generated page uses. */
+  .paper-wash {
+    background-image:
+      radial-gradient(62rem 34rem at 12% -6%, var(--wash-strong), transparent 62%),
+      radial-gradient(46rem 30rem at 92% 8%, var(--wash-soft), transparent 60%);
   }
 
   /* Signage label: the small caps used on filter group headings. */
