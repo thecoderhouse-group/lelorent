@@ -189,6 +189,7 @@ export function ListingForm({ cities }: { cities: City[] }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState(0);
+  const [formValid, setFormValid] = useState(false);
 
   // Localities depend on the city, and slugs are not interchangeable between
   // cities, so the selection is cleared whenever the city changes.
@@ -316,6 +317,15 @@ export function ListingForm({ cities }: { cities: City[] }) {
     router.push(`/viewproperty/${listingId}`);
   }
 
+  // Native `required` checks cover the text/date inputs; the chip pickers and
+  // the city/locality state are checked explicitly.
+  const canPublish =
+    formValid &&
+    flatType.length > 0 &&
+    listingKind.length > 0 &&
+    cityId !== "" &&
+    localityId !== "";
+
   const busy = phase !== "idle";
   const busyLabel =
     phase === "saving"
@@ -326,10 +336,21 @@ export function ListingForm({ cities }: { cities: City[] }) {
           ? "Publishing…"
           : "";
 
+  // Initial validity (e.g. browser-restored values) once the form has mounted.
+  useEffect(() => {
+    if (formRef.current) setFormValid(formRef.current.checkValidity());
+  }, [cityId, localityId, localities]);
+
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-9">
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      onInput={(e) => setFormValid(e.currentTarget.checkValidity())}
+      onChange={(e) => setFormValid(e.currentTarget.checkValidity())}
+      className="flex flex-col gap-9"
+    >
       {/* ---------------------------------------------------------- basics -- */}
       <Section step={1} title="The basics" hint="What are you listing, and where?">
         <div className="flex flex-col gap-5">
@@ -482,7 +503,7 @@ export function ListingForm({ cities }: { cities: City[] }) {
               type="number"
               required
               min={1}
-              step={500}
+              step={1}
               inputMode="numeric"
               placeholder="32000"
               className={cn(inputClass, "tnum")}
@@ -500,6 +521,7 @@ export function ListingForm({ cities }: { cities: City[] }) {
               className={cn(inputClass, "tnum")}
             />
           </Field>
+          {!maintIncluded && (
           <Field label="Maintenance" htmlFor="maintenance">
             <input
               id="maintenance"
@@ -512,6 +534,7 @@ export function ListingForm({ cities }: { cities: City[] }) {
               className={cn(inputClass, "tnum")}
             />
           </Field>
+          )}
         </div>
         <div className="mt-4">
           <Toggle
@@ -679,7 +702,7 @@ export function ListingForm({ cities }: { cities: City[] }) {
 
           <button
             type="submit"
-            disabled={busy}
+            disabled={busy || !canPublish}
             className="inline-flex h-11 shrink-0 items-center gap-2 rounded-md bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform hover:brightness-105 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:active:translate-y-0"
           >
             {busy ? (

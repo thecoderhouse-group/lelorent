@@ -19,8 +19,10 @@ import { getCurrentUser } from "@/lib/auth";
  */
 export async function SiteHeader({
   showSearch = true,
+  showListCta = true,
 }: {
   showSearch?: boolean;
+  showListCta?: boolean;
 } = {}) {
   const user = await getCurrentUser();
 
@@ -42,6 +44,7 @@ export async function SiteHeader({
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+          {showListCta && (
           <Link
             href="/listaproperty"
             className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground shadow-soft transition-transform hover:brightness-105 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:active:translate-y-0 sm:px-4"
@@ -51,6 +54,7 @@ export async function SiteHeader({
             <span className="hidden sm:inline">List a property</span>
             <span className="sm:hidden">List</span>
           </Link>
+          )}
           <UserMenu user={user} />
           <ThemeToggle />
         </div>
