@@ -12,5 +12,19 @@ export function ThemeProvider({
   children,
   ...props
 }: ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+  return (
+    <NextThemesProvider
+      // next-themes renders an inline <script> that sets the theme class
+      // before paint. It does its job from the server HTML; when React renders
+      // it again on the client, React 19 warns that client scripts never run.
+      // Marking the client copy as non-JS silences that without changing
+      // behaviour (the element already has suppressHydrationWarning).
+      scriptProps={{
+        type: typeof window === "undefined" ? undefined : "application/json",
+      }}
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  );
 }
