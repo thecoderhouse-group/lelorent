@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  ArrowRight,
   CalendarBlank,
   Dog,
   ForkKnife,
@@ -93,7 +94,7 @@ function PhotoSlot({ listing }: { listing: ListingCardData }) {
         height={427}
         loading="lazy"
         decoding="async"
-        className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         style={
           listing.cover_blur
             ? {
@@ -104,6 +105,24 @@ function PhotoSlot({ listing }: { listing: ListingCardData }) {
             : undefined
         }
       />
+
+      {/* Hover: a soft darkening at the foot, a light glint sweeping across,
+          and a "View details" pill. All decorative; the card is the link. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[300%] group-hover:opacity-100 motion-reduce:hidden"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-3 right-3 inline-flex translate-y-2 items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-[0.6875rem] font-semibold text-white opacity-0 backdrop-blur transition-[transform,opacity] duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0"
+      >
+        View details
+        <ArrowRight size={11} weight="bold" />
+      </span>
     </div>
   );
 }
@@ -132,10 +151,12 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-soft",
-        "transition-[border-color,transform,box-shadow] duration-200 ease-out",
-        "hover:border-primary/45 hover:shadow-lift focus-within:border-primary/45",
-        "active:translate-y-px motion-reduce:active:translate-y-0",
+        "group relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card shadow-soft",
+        "transition-[border-color,transform,box-shadow] duration-300 ease-out",
+        // Lift with a gold-edged shadow rather than only recolouring the border.
+        "hover:-translate-y-1.5 hover:border-primary/60 hover:shadow-[0_22px_45px_-15px_rgb(0_0_0/0.55),0_0_0_1px_color-mix(in_oklab,var(--primary)_30%,transparent)]",
+        "focus-within:border-primary/45 active:translate-y-0",
+        "motion-reduce:hover:translate-y-0",
       )}
     >
       <div className="relative">
@@ -154,7 +175,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
 
       <div className="flex flex-1 flex-col gap-2 p-3.5">
         <div className="flex items-baseline justify-between gap-2">
-          <p className="tnum text-base font-semibold leading-none text-foreground">
+          <p className="tnum text-base font-semibold leading-none text-foreground transition-colors duration-300 group-hover:text-primary">
             {formatRupees(listing.rent)}
             <span className="ml-1 font-sans text-[0.6875rem] font-normal text-muted-foreground">
               /mo
@@ -212,15 +233,15 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
 export function ListingCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
-      <div className="aspect-3/2 animate-pulse bg-muted" />
+      <div className="aspect-3/2 shimmer" />
       <div className="flex flex-col gap-2 p-3.5">
         <div className="flex items-center justify-between gap-2">
-          <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-12 animate-pulse rounded-full bg-muted" />
+          <div className="h-4 w-20 shimmer rounded" />
+          <div className="h-4 w-12 shimmer rounded-full" />
         </div>
-        <div className="h-3.5 w-full animate-pulse rounded bg-muted" />
-        <div className="h-2.5 w-2/3 animate-pulse rounded bg-muted" />
-        <div className="mt-0.5 h-2.5 w-1/2 animate-pulse rounded bg-muted" />
+        <div className="h-3.5 w-full shimmer rounded" />
+        <div className="h-2.5 w-2/3 shimmer rounded" />
+        <div className="mt-0.5 h-2.5 w-1/2 shimmer rounded" />
       </div>
     </div>
   );

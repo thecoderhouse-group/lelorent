@@ -368,3 +368,38 @@
     animation-iteration-count: infinite !important;
   }
 }
+
+/* Loading shimmer: a soft band of light sweeping across a placeholder.
+   Use on any skeleton block in place of animate-pulse + bg-muted. Kept
+   running (slower) under reduce motion, like the ambient drift above: it is a
+   light sweep, not movement of content, and without it the skeleton reads as
+   a broken page. */
+@keyframes shimmer-sweep {
+  100% { transform: translateX(100%); }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--muted);
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--foreground) 7%, transparent) 40%,
+    color-mix(in oklab, var(--primary) 14%, transparent) 50%,
+    color-mix(in oklab, var(--foreground) 7%, transparent) 60%,
+    transparent 100%
+  );
+  animation: shimmer-sweep 1.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after {
+    animation-duration: 2.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

@@ -12,6 +12,7 @@ import {
   type ActiveFilter,
   type Filters,
 } from "@/lib/filters";
+import { useSearchTransition } from "@/components/search-pending";
 
 const ARRAY_KEYS = [
   "locality",
@@ -34,9 +35,12 @@ export function ActiveFilters({
   /** slug -> display name, resolved server-side so chips read "Baner" not "baner" */
   localityNames: Record<string, string>;
 }) {
+  const startTransition = useSearchTransition();
   const [filters, setFilters] = useQueryStates(filterParsers, {
     shallow: false,
     history: "replace",
+    // Lets the results show a skeleton while the server re-renders.
+    startTransition,
   });
 
   const chips = describeActiveFilters(
@@ -76,7 +80,7 @@ export function ActiveFilters({
             <button
               type="button"
               onClick={() => remove(chip)}
-              className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-accent py-1 pl-3 pr-2 text-xs font-medium text-accent-foreground transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-accent py-1 pl-3 pr-2 text-xs font-medium text-accent-foreground transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md motion-reduce:hover:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               {chip.label}
               <X

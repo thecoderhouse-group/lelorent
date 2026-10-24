@@ -27,6 +27,7 @@ import {
   type SortKey,
 } from "@/lib/filters";
 import type { City, Locality } from "@/lib/listings";
+import { useSearchTransition } from "@/components/search-pending";
 
 export function SearchToolbar({
   total,
@@ -39,9 +40,12 @@ export function SearchToolbar({
   cities: City[];
   localities: Locality[];
 }) {
+  const startTransition = useSearchTransition();
   const [filters, setFilters] = useQueryStates(filterParsers, {
     shallow: false,
     history: "replace",
+    // Lets the results show a skeleton while the server re-renders.
+    startTransition,
   });
   const [sheetOpen, setSheetOpen] = useState(false);
 
