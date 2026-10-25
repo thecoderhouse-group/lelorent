@@ -340,3 +340,66 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Ambient light for dark sections: large blurred orbs that drift slowly.
+   Kept running (just slower) under reduce motion: it is a slow colour shift,
+   not spatial movement, and the reset above would otherwise freeze it. */
+@keyframes ambient-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(12%, 10%, 0) scale(1.2); }
+}
+@keyframes ambient-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.1); }
+  50% { transform: translate3d(-14%, -8%, 0) scale(0.9); }
+}
+@keyframes ambient-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.95); }
+  50% { transform: translate3d(8%, -12%, 0) scale(1.15); }
+}
+.ambient-drift-a { animation: ambient-drift-a 18s ease-in-out infinite; }
+.ambient-drift-b { animation: ambient-drift-b 23s ease-in-out infinite; }
+.ambient-drift-c { animation: ambient-drift-c 27s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-drift-a,
+  .ambient-drift-b,
+  .ambient-drift-c {
+    animation-duration: 40s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* Loading shimmer: a soft band of light sweeping across a placeholder.
+   Use on any skeleton block in place of animate-pulse + bg-muted. Kept
+   running (slower) under reduce motion, like the ambient drift above: it is a
+   light sweep, not movement of content, and without it the skeleton reads as
+   a broken page. */
+@keyframes shimmer-sweep {
+  100% { transform: translateX(100%); }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--muted);
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--foreground) 7%, transparent) 40%,
+    color-mix(in oklab, var(--primary) 14%, transparent) 50%,
+    color-mix(in oklab, var(--foreground) 7%, transparent) 60%,
+    transparent 100%
+  );
+  animation: shimmer-sweep 1.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after {
+    animation-duration: 2.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

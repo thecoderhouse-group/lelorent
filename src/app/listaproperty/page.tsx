@@ -24,7 +24,7 @@ export default async function ListAPropertyPage() {
 
   return (
     <>
-      <SiteHeader showSearch={false} />
+      <SiteHeader showSearch={false} showListCta={false} />
 
       <main className="flex-1">
         <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">

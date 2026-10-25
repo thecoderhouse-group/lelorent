@@ -6,6 +6,7 @@ import { MagnifyingGlass, X } from "@phosphor-icons/react/ssr";
 
 import { filterParsers } from "@/lib/filters";
 import { cn } from "@/lib/utils";
+import { useSearchTransition } from "@/components/search-pending";
 
 /**
  * Free-text search over title, locality and city (the search_vector column
@@ -16,9 +17,12 @@ import { cn } from "@/lib/utils";
  * user is still typing a locality name.
  */
 export function SearchInput({ className }: { className?: string }) {
+  const startTransition = useSearchTransition();
   const [filters, setFilters] = useQueryStates(filterParsers, {
     shallow: false,
     history: "replace",
+    // Lets the results show a skeleton while the server re-renders.
+    startTransition,
   });
   const [draft, setDraft] = useState(filters.q);
 

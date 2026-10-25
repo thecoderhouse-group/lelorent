@@ -25,6 +25,7 @@ import {
 } from "@/lib/filters";
 import type { City, Locality } from "@/lib/listings";
 import { cn } from "@/lib/utils";
+import { useSearchTransition } from "@/components/search-pending";
 
 const FLAT_TYPES = Object.keys(FLAT_TYPE_LABELS) as (keyof typeof FLAT_TYPE_LABELS)[];
 const FOOD_PREFS = Object.keys(FOOD_PREF_LABELS) as (keyof typeof FOOD_PREF_LABELS)[];
@@ -67,15 +68,18 @@ function CheckRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-2.5">
+    // The whole row is a hover target: a soft band, the box grows a touch and
+    // the label nudges right, so the pointer always gets a response.
+    <div className="group flex items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors duration-200 hover:bg-primary/10">
       <Checkbox
         id={id}
         checked={checked}
         onCheckedChange={(v) => onChange(v === true)}
+        className="transition-transform duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
       />
       <Label
         htmlFor={id}
-        className="cursor-pointer text-sm font-normal leading-none text-foreground/90"
+        className="cursor-pointer text-sm font-normal leading-none text-foreground/90 transition-[transform,color] duration-200 group-hover:translate-x-1 group-hover:text-foreground motion-reduce:group-hover:translate-x-0"
       >
         {children}
       </Label>
@@ -92,9 +96,12 @@ export function FilterPanel({
   localities: Locality[];
   className?: string;
 }) {
+  const startTransition = useSearchTransition();
   const [filters, setFilters] = useQueryStates(filterParsers, {
     shallow: false,
     history: "replace",
+    // Lets the results show a skeleton while the server re-renders.
+    startTransition,
   });
 
   // The slider is dragged continuously; committing every frame to the URL
@@ -140,11 +147,13 @@ export function FilterPanel({
                   })
                 }
                 className={cn(
-                  "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                  "rounded-full border px-3 py-1.5 text-xs font-medium",
+                  "transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out",
+                  "hover:-translate-y-0.5 active:translate-y-0 active:scale-95 motion-reduce:hover:translate-y-0",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   active
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground/80 hover:border-primary/50",
+                    ? "border-primary bg-primary text-primary-foreground shadow-[0_6px_16px_-6px_var(--primary)]"
+                    : "border-border bg-card text-foreground/80 hover:border-primary/60 hover:bg-primary/10 hover:text-foreground hover:shadow-md",
                 )}
               >
                 {city.name}
@@ -158,7 +167,7 @@ export function FilterPanel({
         <>
           <Separator className="bg-hairline" />
           <Group title="Locality">
-            <div className="flex max-h-52 flex-col gap-2.5 overflow-y-auto pr-1">
+            <div className="flex max-h-52 flex-col gap-0.5 overflow-y-auto pr-1">
               {localities.map((loc) => (
                 <CheckRow
                   key={loc.slug}
@@ -210,7 +219,7 @@ export function FilterPanel({
       <Separator className="bg-hairline" />
 
       <Group title="Property type">
-        <div className="grid grid-cols-1 gap-2.5">
+        <div className="grid grid-cols-1 gap-0.5">
           {FLAT_TYPES.map((t) => (
             <CheckRow
               key={t}
@@ -272,7 +281,7 @@ export function FilterPanel({
       <Separator className="bg-hairline" />
 
       <Group title="Amenities">
-        <div className="grid grid-cols-1 gap-2.5">
+        <div className="grid grid-cols-1 gap-0.5">
           {FILTERABLE_AMENITIES.map((a) => (
             <CheckRow
               key={a}

@@ -7,14 +7,16 @@ import { ActiveFilters } from "@/components/active-filters";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CategoryTabs } from "@/components/category-tabs";
 import { FilterPanel } from "@/components/filter-panel";
-import { ListingCard, ListingCardSkeleton } from "@/components/listing-card";
+import { Reveal } from "@/components/home/reveal";
+import { ListingCard } from "@/components/listing-card";
+import { PendingSwap, SearchPendingProvider } from "@/components/search-pending";
+import { ResultsGridSkeleton, SearchResultsSkeleton } from "@/components/search-skeleton";
 import { SearchToolbar } from "@/components/search-toolbar";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import {
   describeActiveFilters,
   searchParamsCache,
-  PAGE_SIZE,
   type Filters,
 } from "@/lib/filters";
 import {
@@ -173,12 +175,19 @@ async function Results({ filters }: { filters: Filters }) {
           <ActiveFilters localityNames={localityNames} />
         </div>
 
+        {/* While a filter change is loading, the grid shows a shimmer
+            skeleton instead of the stale results. */}
+        <PendingSwap skeleton={<ResultsGridSkeleton />}>
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {listings.length === 0 ? (
             <EmptyState hasFilters={chips.length > 0} />
           ) : (
-            listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+            // Results remount whenever the filters change (the Suspense
+            // boundary below is keyed), so the entrance replays per search.
+            listings.map((listing, index) => (
+              <Reveal key={listing.id} index={index} once className="h-full">
+                <ListingCard listing={listing} />
+              </Reveal>
             ))
           )}
         </div>
@@ -186,32 +195,7 @@ async function Results({ filters }: { filters: Filters }) {
         {/* `page` comes from the query, not the URL: an out-of-range request
             is clamped server-side, so the control reflects what was served. */}
         <Pagination page={page} pageCount={pageCount} makeHref={makeHref} />
-      </div>
-    </div>
-  );
-}
-
-function ResultsSkeleton() {
-  return (
-    <div className="mx-auto flex w-full max-w-[1400px] gap-8 px-4 py-6 sm:px-6 lg:py-8">
-      <aside className="hidden w-64 shrink-0 lg:block" aria-hidden="true">
-        <div className="flex flex-col gap-6">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex flex-col gap-2.5">
-              <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-              <div className="h-4 w-full animate-pulse rounded bg-muted" />
-              <div className="h-4 w-4/5 animate-pulse rounded bg-muted" />
-            </div>
-          ))}
-        </div>
-      </aside>
-      <div className="min-w-0 flex-1">
-        <div className="h-9 w-40 animate-pulse rounded bg-muted" />
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-          {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-            <ListingCardSkeleton key={i} />
-          ))}
-        </div>
+        </PendingSwap>
       </div>
     </div>
   );
@@ -266,17 +250,17 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const city = cities.find((c) => c.slug === filters.city) ?? null;
 
   return (
-    <>
+    <SearchPendingProvider>
       <SiteHeader />
       <main className="flex-1">
         <SearchMasthead city={city} />
         {/* Keyed so switching filters re-suspends and shows the skeleton
             rather than holding the previous results in place. */}
-        <Suspense key={JSON.stringify(filters)} fallback={<ResultsSkeleton />}>
+        <Suspense key={JSON.stringify(filters)} fallback={<SearchResultsSkeleton />}>
           <Results filters={filters} />
         </Suspense>
       </main>
       <SiteFooter />
-    </>
+    </SearchPendingProvider>
   );
 }

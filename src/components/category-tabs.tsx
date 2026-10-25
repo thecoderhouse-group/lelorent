@@ -12,6 +12,8 @@ import {
 import { CATEGORIES, categoryFromKind, type CategoryKey } from "@/lib/categories";
 import { filterParsers } from "@/lib/filters";
 import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
+import { useSearchTransition } from "@/components/search-pending";
 
 const ICONS = {
   all: SquaresFour,
@@ -31,9 +33,12 @@ const ICONS = {
  * roving, a linked tabpanel) that does not exist here.
  */
 export function CategoryTabs() {
+  const startTransition = useSearchTransition();
   const [filters, setFilters] = useQueryStates(filterParsers, {
     shallow: false,
     history: "replace",
+    // Lets the results show a skeleton while the server re-renders.
+    startTransition,
   });
 
   const active = categoryFromKind(filters.kind);
@@ -62,8 +67,8 @@ export function CategoryTabs() {
                   setFilters({ kind: category.kind, type: [], page: 1 })
                 }
                 className={cn(
-                  "relative flex h-16 w-22 flex-col items-center justify-center gap-1.5 rounded-t-md px-2",
-                  "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                  "group relative flex h-16 w-22 flex-col items-center justify-center gap-1.5 rounded-t-md px-2",
+                  "transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                   isActive
                     ? "text-foreground"
                     : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
@@ -73,19 +78,31 @@ export function CategoryTabs() {
                   size={22}
                   weight={isActive ? "fill" : "regular"}
                   aria-hidden="true"
+                  className={cn(
+                    "transition-[transform,color] duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-110 motion-reduce:group-hover:translate-y-0 motion-reduce:group-hover:scale-100",
+                    isActive ? "text-primary" : "group-hover:text-primary",
+                  )}
                 />
                 <span className="text-xs font-medium leading-none">
                   {category.label}
                 </span>
                 {/* Sits on the section's bottom rule, so the active tab reads
                     as connected to the results below it. */}
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-colors",
-                    isActive ? "bg-primary" : "bg-transparent",
-                  )}
-                />
+                {isActive ? (
+                  // Shared layoutId: the underline slides to the new tab.
+                  <motion.span
+                    layoutId="category-tab-underline"
+                    aria-hidden="true"
+                    className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-primary"
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                  />
+                ) : (
+                  // Hover preview: a faint underline grows from the centre.
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-2 bottom-0 h-0.5 origin-center scale-x-0 rounded-full bg-primary/45 transition-transform duration-300 ease-out group-hover:scale-x-100"
+                  />
+                )}
               </button>
             </li>
           );
