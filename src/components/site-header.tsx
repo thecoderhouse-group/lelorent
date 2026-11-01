@@ -3,6 +3,7 @@ import { Plus } from "@phosphor-icons/react/ssr";
 
 import { SearchInput } from "@/components/search-input";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Logo } from "@/components/logo";
 import { UserMenu } from "@/components/user-menu";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -31,12 +32,10 @@ export async function SiteHeader({
       <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-3 px-4 sm:gap-5 sm:px-6">
         <Link
           href="/"
+          aria-label="Lelo.Rent home"
           className="shrink-0 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <span className="text-lg font-semibold tracking-tight text-foreground">
-            lelorent
-            <span className="text-primary">.</span>
-          </span>
+          <Logo imgClassName="h-6 sm:h-7" />
         </Link>
 
         {showSearch && (

@@ -42,3 +42,7 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# Google OAuth client secrets downloaded from Cloud Console
+client_secret_*.json*
+.client_secret_*.json*

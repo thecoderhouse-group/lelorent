@@ -30,8 +30,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Lelorent — rent a flat without the broker theatre",
-    template: "%s · Lelorent",
+    default: "Lelo.Rent — rent a flat without the broker theatre",
+    template: "%s · Lelo.Rent",
   },
   description:
     "Search flats, PGs and shared rooms across Pune, Mumbai, Bengaluru, Hyderabad, Delhi and Gurugram. Filter by rent, food preference, pets and tenant type. Listed by owners.",
