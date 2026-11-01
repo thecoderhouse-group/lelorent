@@ -7,7 +7,7 @@ import { getSiteUrl } from "@/lib/site-url";
 
 function safePath(next: FormDataEntryValue | null): string {
   const value = typeof next === "string" ? next : "";
-  return value.startsWith("/") && !value.startsWith("//") ? value : "/search";
+  return value.startsWith("/") && !value.startsWith("//") ? value : "/";
 }
 
 export type AuthState = { error?: string; sent?: boolean };
@@ -64,9 +64,16 @@ export async function signInWithGoogle(formData: FormData) {
   redirect(data.url);
 }
 
-export async function signOut() {
+/** Pages that need an account; signing out there goes home instead. */
+const SIGNED_IN_ONLY = ["/listaproperty", "/premium", "/dashboard", "/account"];
+
+export async function signOut(formData: FormData) {
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
-  redirect("/search");
+
+  // Stay on the page the user was on, unless it requires being signed in.
+  const next = safePath(formData.get("next"));
+  const needsAccount = SIGNED_IN_ONLY.some((p) => next.startsWith(p));
+  redirect(needsAccount ? "/" : next);
 }
