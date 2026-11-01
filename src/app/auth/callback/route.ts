@@ -8,11 +8,11 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/search";
+  const next = searchParams.get("next") ?? "/";
 
   // Only same-site paths. An open redirect here would let a phishing link
   // bounce a freshly authenticated user to an attacker's page.
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/search";
+  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/";
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`);

@@ -17,11 +17,11 @@ export const metadata: Metadata = {
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const params = await searchParams;
-  const next = typeof params.next === "string" ? params.next : "/search";
+  const next = typeof params.next === "string" ? params.next : "/";
   const error = typeof params.error === "string" ? params.error : null;
 
   const user = await getCurrentUser();
-  if (user) redirect(next.startsWith("/") ? next : "/search");
+  if (user) redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/");
 
   return (
     <>
