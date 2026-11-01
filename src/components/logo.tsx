@@ -1,54 +1,63 @@
+/* eslint-disable @next/next/no-img-element -- tiny pre-sized brand PNGs;
+   next/image would add a resize round trip for no gain. */
 import { cn } from "@/lib/utils";
 
 /**
- * Brand mark: a house outline with a keyhole — renting, straight from the
- * person holding the key. Drawn in currentColor for the outline and
- * --primary for the fill, so it follows the theme.
+ * Brand assets live in /public/brand, cut from the Lelo.Rent logo:
+ *   wordmark-light.png  original colours, for light backgrounds
+ *   wordmark-dark.png   "Lelo" in white, for dark backgrounds
+ *   mark.png            the white circle badge, for square slots
+ *
+ * Both wordmarks are rendered and CSS shows the right one. The `dark:`
+ * variant follows the nearest `.dark` ancestor, so sections that force the
+ * dark look (hero, footer) get the white version regardless of site theme.
  */
-export function LogoMark({ className }: { className?: string }) {
+const WORDMARK = { width: 606, height: 123 };
+
+export function Logo({
+  className,
+  imgClassName,
+}: {
+  className?: string;
+  /** Height utility for the wordmark, e.g. "h-7". Width follows. */
+  imgClassName?: string;
+}) {
   return (
-    <svg
-      viewBox="0 0 40 40"
-      aria-hidden="true"
-      className={cn("size-9 shrink-0", className)}
-    >
-      <rect x="1" y="1" width="38" height="38" rx="10" className="fill-primary" />
-      {/* House */}
-      <path
-        d="M11 19.5 20 12l9 7.5V29a1 1 0 0 1-1 1H12a1 1 0 0 1-1-1z"
-        fill="none"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-        className="stroke-primary-foreground"
+    <span className={cn("inline-flex items-center", className)}>
+      <img
+        src="/brand/wordmark-light.png"
+        alt="Lelo.Rent"
+        width={WORDMARK.width}
+        height={WORDMARK.height}
+        className={cn("h-7 w-auto dark:hidden", imgClassName)}
       />
-      {/* Keyhole */}
-      <circle cx="20" cy="21" r="2.6" className="fill-primary-foreground" />
-      <path d="M18.9 22.5h2.2l.7 4.3h-3.6z" className="fill-primary-foreground" />
-    </svg>
+      <img
+        src="/brand/wordmark-dark.png"
+        alt="Lelo.Rent"
+        width={WORDMARK.width}
+        height={WORDMARK.height}
+        className={cn("hidden h-7 w-auto dark:block", imgClassName)}
+      />
+    </span>
   );
 }
 
-/** Mark + wordmark. */
-export function Logo({
+/** The circle badge on its own. Decorative unless given a label. */
+export function LogoMark({
   className,
-  markClassName,
-  wordClassName,
+  label,
 }: {
   className?: string;
-  markClassName?: string;
-  wordClassName?: string;
+  label?: string;
 }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <LogoMark className={markClassName} />
-      <span
-        className={cn(
-          "text-lg font-semibold tracking-tight text-foreground",
-          wordClassName,
-        )}
-      >
-        lelorent<span className="text-primary">.</span>
-      </span>
-    </span>
+    <img
+      src="/brand/mark.png"
+      alt={label ?? ""}
+      aria-hidden={label ? undefined : true}
+      width={256}
+      height={256}
+      className={cn("size-9 shrink-0 rounded-full", className)}
+    />
   );
 }

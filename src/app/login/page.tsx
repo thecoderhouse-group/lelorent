@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { EnvelopeSimple, GoogleLogo, WarningCircle } from "@phosphor-icons/react/ssr";
 
+import { LogoMark } from "@/components/logo";
+
 import { EmailSignInForm } from "@/components/email-signin-form";
 import { SiteHeader } from "@/components/site-header";
 import { signInWithGoogle } from "@/app/auth/actions";
@@ -26,7 +28,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <SiteHeader />
       <main className="flex flex-1 items-start justify-center px-4 py-12 sm:py-20">
         <div className="w-full max-w-sm">
-          <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+          <LogoMark className="mb-5 size-14 shadow-[0_8px_24px_-8px_rgb(0_0_0/0.5)] ring-1 ring-border" />
+          <h1 className="text-2xl font-semibold tracking-tight">Sign in to Lelo.Rent</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Unlock owner contacts and list your own property. No password to
             remember.

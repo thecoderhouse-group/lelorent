@@ -58,10 +58,10 @@ export async function SiteFooter() {
           <div className="flex flex-col items-start gap-5">
             <Link
               href="/"
-              aria-label="lelorent home"
+              aria-label="Lelo.Rent home"
               className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
-              <Logo markClassName="size-11" wordClassName="text-2xl text-white" />
+              <Logo imgClassName="h-9" />
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-white/65">
               Flats, rooms and PGs listed by the people who actually own them. No
@@ -118,11 +118,11 @@ export async function SiteFooter() {
           aria-hidden="true"
           className="pointer-events-none select-none text-center text-[22vw] font-semibold leading-[0.8] tracking-tighter text-primary/[0.07] lg:text-[17rem]"
         >
-          lelorent
+          Lelo.Rent
         </p>
 
         <div className="flex flex-col gap-1 border-t border-white/10 py-5 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year} Lelorent. Made in India.</p>
+          <p>© {year} Lelo.Rent. Made in India.</p>
           <p>Rents shown are what owners asked for, not estimates.</p>
         </div>
       </div>

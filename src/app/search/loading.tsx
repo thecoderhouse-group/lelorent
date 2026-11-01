@@ -14,7 +14,7 @@ export default function SearchLoading() {
     <>
       <div className="sticky top-0 z-40 border-b border-hairline bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1400px] items-center px-4 sm:px-6">
-          <Logo markClassName="size-8" />
+          <Logo imgClassName="h-6 sm:h-7" />
         </div>
       </div>
       <main className="flex-1">

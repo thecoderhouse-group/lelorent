@@ -114,7 +114,9 @@ export function PremiumCheckout({
         amount: order.amount,
         currency: order.currency,
         order_id: order.orderId,
-        name: "Lelorent",
+        name: "Lelo.Rent",
+        // Shown at the top of the Razorpay window.
+        image: `${window.location.origin}/brand/mark.png`,
         description: order.description,
         prefill: order.prefill,
         theme: { color: "#E3B45A" },
